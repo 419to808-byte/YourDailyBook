@@ -183,6 +183,13 @@ img { max-width: 100%; }
 .tab-btn:hover .tab-sub { color: var(--ink-soft); }
 .tab-btn.active { background: var(--accent); border-color: var(--accent); color: var(--navy); }
 .tab-btn.active .tab-sub { color: var(--navy); opacity: 0.85; }
+
+/* Small Continue Reading button (v15) — not a tab, sits in a slim row
+   under the 3 main tabs. Same pill shape, smaller type. */
+.continue-mini-row { padding: 10px 0 2px; text-align: center; }
+.continue-mini-btn { font-size: 0.85rem; padding: 6px 16px; border-radius: 999px; }
+.continue-mini-btn.active { background: var(--accent); border-color: var(--accent); color: var(--navy); }
+#continueBackBtn { margin-bottom: 12px; }
 .tab-panel { display: none; padding: 20px 0 8px; }
 .tab-panel.active { display: block; }
 

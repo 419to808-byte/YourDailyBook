@@ -536,6 +536,9 @@ function switchTab(name) {
     btn.classList.toggle("active", active);
     btn.setAttribute("aria-selected", active ? "true" : "false");
   });
+  // The small Continue Reading button is not a tab, but it shows the
+  // active state when the Continue view is open (v15).
+  $$("#continueMiniBtn").forEach(btn => btn.classList.toggle("active", name === "continue"));
   $$(".tab-panel").forEach(panel => {
     panel.classList.toggle("active", panel.id === "panel-" + name);
   });
@@ -545,6 +548,14 @@ function switchTab(name) {
 }
 
 $$(".tab-btn").forEach(btn => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
+$$("#continueMiniBtn").forEach(btn => btn.addEventListener("click", () => {
+  switchTab("continue");
+  document.getElementById("tabs").scrollIntoView({ behavior: "smooth" });
+}));
+$$("#continueBackBtn").forEach(btn => btn.addEventListener("click", () => {
+  switchTab("daily");
+  document.getElementById("tabs").scrollIntoView({ behavior: "smooth" });
+}));
 $$("[data-nav-tab]").forEach(a => a.addEventListener("click", () => switchTab(a.dataset.navTab)));
 $$("[data-cta-tab]").forEach(btn => btn.addEventListener("click", () => {
   switchTab(btn.dataset.ctaTab);
