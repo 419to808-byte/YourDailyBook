@@ -685,8 +685,7 @@ function bookCardHTML(book, opts) {
           <span>${escapeHtml(book.genre)}</span>
           <span>📖 13 chapters</span>
           <span>⏱ ${book.dur}</span>
-          <span class="badge badge-rating">${ratingLabel(book.rating)}</span>
-          <span class="badge badge-new">New today</span>
+          <span class="book-badges"><span class="badge badge-rating">${ratingLabel(book.rating)}</span><span class="badge badge-new">New today</span></span>
         </p>
         <p class="book-desc">${escapeHtml(book.desc)}</p>
         <p class="preview-label">The opening pages</p>
@@ -1394,7 +1393,7 @@ function renderReader() {
   const headHTML = `
       <div class="reader-head">
         <h2>${escapeHtml(book.title)}</h2>
-        <p class="muted">${escapeHtml(book.genre)} · ${book.dur} · 13 chapters · <span class="badge badge-rating">${ratingLabel(book.rating)}</span> <span class="badge badge-ai-dark">AI-Generated</span> <span class="badge badge-new">New today</span></p>
+        <p class="muted">${escapeHtml(book.genre)} · ${book.dur} · 13 chapters · <span class="book-badges"><span class="badge badge-rating">${ratingLabel(book.rating)}</span> <span class="badge badge-ai-dark">AI-Generated</span> <span class="badge badge-new">New today</span></span></p>
       </div>`;
   const voiceHTML = `
         <label class="reader-voice">Narrator

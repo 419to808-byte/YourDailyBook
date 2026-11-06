@@ -248,6 +248,11 @@ textarea { min-height: 90px; resize: vertical; }
 /* Small grey lock icon on a locked book card — the only sign a book
    is locked. Grey (not the emoji's default yellow) so it reads as
    "unavailable", not as a warning. */
+/* Rating + "New today" stay together on one line: the badges sit in
+   one nowrap group, so the group wraps as a unit and the badges never
+   split across lines. */
+.book-badges { display: inline-flex; gap: 6px; align-items: center; flex-wrap: nowrap; }
+.book-meta .book-badges { gap: 6px; }
 .cover-badges { display: inline-flex; gap: 6px; align-items: center; }
 .lock-icon { color: var(--ink-faint); filter: grayscale(1); font-size: 0.85rem; }
 .badge-new { background: var(--ok); color: #fff; }
