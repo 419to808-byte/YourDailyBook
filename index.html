@@ -64,13 +64,12 @@
     <p>A brand-new book in each genre lands every morning. Pick a genre, pick a voice, press play.</p>
   </div>
   <div class="filter-row">
-    <label for="spiceFilter">Spice level:</label>
-    <select id="spiceFilter" style="width:auto">
-      <option value="0">Show all</option>
-      <option value="1">1 — Sweet</option>
-      <option value="2">2 — Mild</option>
-      <option value="3">3 — Steamy</option>
-      <option value="4">4 — Open-door</option>
+    <label for="ratingFilter">Rating:</label>
+    <select id="ratingFilter" style="width:auto">
+      <option value="">Show all</option>
+      <option value="PG">PG</option>
+      <option value="PG-13">PG-13</option>
+      <option value="R">Rated R</option>
     </select>
     <span class="small muted" id="bookCount"></span>
   </div>
@@ -92,7 +91,7 @@
   </section>
 
   <div class="book-grid" id="bookGrid"></div>
-  <p class="small muted mt-3">Catalog books are fiction only, tagged by spice level, and go through a human quality check before they publish. See our <a href="policies.html#community-guidelines">Community Guidelines</a>.</p>
+  <p class="small muted mt-3">Catalog books are fiction only, tagged by content rating (PG, PG-13, or Rated R), and go through a human quality check before they publish. See our <a href="policies.html#community-guidelines">Community Guidelines</a>.</p>
 
   <!-- ================= Closing value-prop (below the book grid) ================= -->
   <!-- The positioning line + AI disclosure + pricing, moved here from the top
@@ -109,7 +108,7 @@
   <div class="section-head">
     <span class="eyebrow">Made For You</span>
     <h2>Your book, every week</h2>
-    <p>Once a week, a short story is written just for you — built from the details you put in at signup. It's your story, about you, in the genres and spice level you choose. Change your details anytime on your account page and your next book changes with them.</p>
+    <p>Once a week, a short story is written just for you — built from the details you put in at signup. It's your story, about you, in the genres and content ratings you choose. Change your details anytime on your account page and your next book changes with them.</p>
   </div>
   <div class="split">
     <div class="card">
@@ -130,14 +129,13 @@
           <div class="check-row" id="pfGenres"></div>
         </div>
         <div class="form-field">
-          <label for="pfSpice">Preferred spice level</label>
-          <select id="pfSpice">
-            <option value="1">1 — Sweet</option>
-            <option value="2" selected>2 — Mild</option>
-            <option value="3">3 — Steamy</option>
-            <option value="4">4 — Open-door</option>
-          </select>
-          <div class="hint" id="pfSpiceHint"></div>
+          <label>Ratings for your weekly book <span class="hint">(pick any that fit you)</span></label>
+          <div class="check-row" id="pfRatings">
+            <label class="check-chip"><input type="checkbox" id="pfRatingPG" value="PG" checked> PG</label>
+            <label class="check-chip"><input type="checkbox" id="pfRatingPG13" value="PG-13" checked> PG-13</label>
+            <label class="check-chip"><input type="checkbox" id="pfRatingR" value="R"> Rated R</label>
+          </div>
+          <div class="hint" id="pfRatingsHint"></div>
         </div>
         <div class="form-field">
           <label for="pfVoice">Your narrator voice</label>
@@ -346,7 +344,7 @@
       <a class="policy-card" href="policies.html#licensing-ownership"><h3>Licensing &amp; Ownership</h3><p>Who owns what, how buying a license works, and what a writer gets when they pay for a book.</p><span class="policy-link">Read the summary →</span></a>
       <a class="policy-card" href="policies.html#refunds-cancellation"><h3>Refunds &amp; Cancellation</h3><p>Cancel anytime, how refunds work, and why the upfront fee is non-refundable after signup.</p><span class="policy-link">Read the summary →</span></a>
       <a class="policy-card" href="policies.html#how-it-works"><h3>How It Works</h3><p>The plain-language guide: the three tabs, the voices, the upfront fee, and your subscription.</p><span class="policy-link">Read the summary →</span></a>
-      <a class="policy-card" href="policies.html#community-guidelines"><h3>Community Guidelines</h3><p>The rules for the shared catalog: fiction only, spice levels, quality, and how reporting works.</p><span class="policy-link">Read the summary →</span></a>
+      <a class="policy-card" href="policies.html#community-guidelines"><h3>Community Guidelines</h3><p>The rules for the shared catalog: fiction only, content ratings, quality, and how reporting works.</p><span class="policy-link">Read the summary →</span></a>
       <a class="policy-card" href="policies.html#age-content-access"><h3>Age &amp; Content Access</h3><p>All ages welcome — content adapts to your age. How the child/adult switch works.</p><span class="policy-link">Read the summary →</span></a>
       <a class="policy-card" href="policies.html#data-deletion"><h3>Data Deletion</h3><p>How to delete your details or your whole account, what gets deleted, and how long it takes.</p><span class="policy-link">Read the summary →</span></a>
     </div>
@@ -480,6 +478,16 @@
       <p class="small muted">Demo sign-in: no account or payment was created yet. Real checkout opens at launch.</p>
       <button class="btn btn-primary" data-close-modal="signupModal" type="button">Start Reading</button>
     </div>
+  </div>
+</div>
+
+<!-- ================= Age lock message ================= -->
+<div class="modal-backdrop" id="ageLockModal" role="dialog" aria-modal="true" aria-labelledby="ageLockTitle">
+  <div class="modal">
+    <button class="modal-close" data-close-modal="ageLockModal" type="button" aria-label="Close">✕</button>
+    <h2 id="ageLockTitle">🔒 This book is locked for now</h2>
+    <p class="muted" id="ageLockText"></p>
+    <button class="btn btn-primary" data-close-modal="ageLockModal" type="button">Got it</button>
   </div>
 </div>
 

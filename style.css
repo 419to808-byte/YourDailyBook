@@ -212,7 +212,7 @@ textarea { min-height: 90px; resize: vertical; }
 /* ---------------- Book cards (post-style: header + meta + body + actions) ---------------- */
 /* Written from scratch for YourDailyBook. Each card reads like a
    post: a slim gradient band on top, then a title header, a meta
-   line (genre, spice, chapters, length), the opening text, and the
+   line (genre, rating, chapters, length), the opening text, and the
    Listen / Read actions with the voice picker. */
 .book-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .book-card {
@@ -244,7 +244,12 @@ textarea { min-height: 90px; resize: vertical; }
 .badge-ai { background: rgba(255, 255, 255, 0.22); color: #fff; border: 1px solid rgba(255, 255, 255, 0.5); }
 .badge-ai-dark { background: var(--accent-soft); color: var(--accent-dark); border: 1px solid #bae6fd; }
 .badge-rough { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
-.badge-spice { background: var(--paper-2); color: var(--ink-soft); border: 1px solid var(--line); }
+.badge-rating { background: var(--paper-2); color: var(--ink-soft); border: 1px solid var(--line); }
+/* Small grey lock icon on a locked book card — the only sign a book
+   is locked. Grey (not the emoji's default yellow) so it reads as
+   "unavailable", not as a warning. */
+.cover-badges { display: inline-flex; gap: 6px; align-items: center; }
+.lock-icon { color: var(--ink-faint); filter: grayscale(1); font-size: 0.85rem; }
 .badge-new { background: var(--ok); color: #fff; }
 .empty-state { text-align: center; color: var(--ink-soft); padding: 48px 16px; grid-column: 1 / -1; }
 
@@ -275,6 +280,10 @@ textarea { min-height: 90px; resize: vertical; }
 }
 .check-chip input { accent-color: var(--accent); }
 .check-chip:has(input:checked) { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-dark); }
+/* A rating box that is not available for this reader's age is greyed
+   out and unclickable (see renderPfRatings). */
+.check-chip:has(input:disabled) { opacity: 0.45; cursor: not-allowed; }
+.check-chip:has(input:disabled):hover { border-color: var(--line); }
 .callout {
   border-left: 4px solid var(--accent); background: var(--accent-soft);
   padding: 14px 16px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: 0.95rem;

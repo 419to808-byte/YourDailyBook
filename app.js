@@ -41,46 +41,46 @@ const VOICES = [
  * durations are in seconds; display strings are pre-formatted.
  */
 const BOOKS = [
-  // Romance (spice 3-4)
-  { id: "r1", title: "The Lighthouse Keeper's Wife", genre: "Romance", spice: 3, secs: 18720, dur: "5h 12m", grad: "g0", desc: "After twenty years apart, a marine biologist returns to the island where she left her first love — and the lighthouse that never stopped burning for her." },
-  { id: "r2", title: "Second Chance at Willow Creek", genre: "Romance", spice: 3, secs: 17280, dur: "4h 48m", grad: "g5", desc: "A big-city chef inherits a failing diner in her hometown and finds the boy who broke her heart now owns the bakery next door." },
-  { id: "r3", title: "The Last Dance in Lisbon", genre: "Romance", spice: 4, secs: 20100, dur: "5h 35m", grad: "g8", desc: "Two rival dance instructors are forced to choreograph one last show together — and the rehearsal room keeps getting smaller." },
-  // Mystery (spice 1-2)
-  { id: "m1", title: "The Clockmaker's Alibi", genre: "Mystery", spice: 2, secs: 17760, dur: "4h 56m", grad: "g4", desc: "Every clock in the village stopped at 11:47 — the exact minute the mayor was found dead. The clockmaker swears he was home. The clocks say otherwise." },
-  { id: "m2", title: "Murder at the Marigold Hotel", genre: "Mystery", spice: 1, secs: 16500, dur: "4h 35m", grad: "g6", desc: "A retired schoolteacher checks into a seaside hotel for a quiet weekend and finds the guest in room 12 never checked out — because he never left." },
-  { id: "m3", title: "The Vanishing Violinist", genre: "Mystery", spice: 2, secs: 18900, dur: "5h 15m", grad: "g1", desc: "A concert violinist vanishes mid-performance, leaving her Stradivarius on the stage and a locked room full of people who all saw nothing." },
-  // Thriller (spice 2)
-  { id: "t1", title: "The Silent Passenger", genre: "Thriller", spice: 2, secs: 19500, dur: "5h 25m", grad: "g4", desc: "A rideshare driver picks up a passenger who knows her name, her route, and the secret she buried ten years ago." },
-  { id: "t2", title: "Countdown in the Dark", genre: "Thriller", spice: 2, secs: 18300, dur: "5h 05m", grad: "g5", desc: "A power grid engineer has 24 hours to find the saboteur inside her own company — before the city goes dark for good." },
-  { id: "t3", title: "The Double Agent's Daughter", genre: "Thriller", spice: 2, secs: 20700, dur: "5h 45m", grad: "g7", desc: "She grew up believing her father was a diplomat. The day he disappears, three governments come looking for her." },
-  // Fantasy (spice 1-2)
-  { id: "f1", title: "The Cartographer's Map of Stars", genre: "Fantasy", spice: 1, secs: 21600, dur: "6h 00m", grad: "g2", desc: "A mapmaker discovers a coastline that moves — and a kingdom that only exists on maps drawn in starlight." },
-  { id: "f2", title: "The Ember Throne", genre: "Fantasy", spice: 2, secs: 20400, dur: "5h 40m", grad: "g0", desc: "The youngest of seven heirs must light the ember throne before the winter court claims it — but the flame only answers to the truth." },
-  { id: "f3", title: "Witches of the Hollow Moon", genre: "Fantasy", spice: 2, secs: 19200, dur: "5h 20m", grad: "g8", desc: "Three estranged sisters inherit their grandmother's spellbook and one very angry moon." },
-  // Science Fiction (spice 1)
-  { id: "s1", title: "The Last Signal from Europa", genre: "Science Fiction", spice: 1, secs: 20880, dur: "5h 48m", grad: "g1", desc: "A deep-space listening post picks up a signal from a dead moon — and it's broadcasting the crew's own voices, three days in the future." },
-  { id: "s2", title: "The Memory Merchants", genre: "Science Fiction", spice: 1, secs: 18000, dur: "5h 00m", grad: "g3", desc: "In a city where memories are currency, a broker who trades in other people's pasts finds a memory of her own that someone paid to erase." },
-  { id: "s3", title: "Starlight Protocol", genre: "Science Fiction", spice: 1, secs: 19800, dur: "5h 30m", grad: "g7", desc: "The first contact team has one rule: never answer back. Then the signal starts asking questions only they would know." },
-  // Horror (spice 1-2)
-  { id: "h1", title: "The House on Hollow Hill", genre: "Horror", spice: 1, secs: 17400, dur: "4h 50m", grad: "g4", desc: "A house-flipper buys the cheapest house in the county. The house has opinions about being flipped." },
-  { id: "h2", title: "Whispers in the Walls", genre: "Horror", spice: 2, secs: 18600, dur: "5h 10m", grad: "g5", desc: "A sound engineer moves into a converted recording studio and starts hearing a song that was never recorded — sung in her own voice." },
-  { id: "h3", title: "The Thirteenth Floor", genre: "Horror", spice: 1, secs: 16800, dur: "4h 40m", grad: "g4", desc: "The elevator in her building has twelve buttons. Her new neighbor keeps pressing a thirteenth." },
-  // Historical Fiction (spice 1-2)
-  { id: "hf1", title: "The Seamstress of Paris", genre: "Historical Fiction", spice: 2, secs: 21000, dur: "5h 50m", grad: "g6", desc: "In occupied Paris, a seamstress hides coded messages in the hems of dresses — until a German officer orders a gown for his wife." },
-  { id: "hf2", title: "Letters from the Front", genre: "Historical Fiction", spice: 1, secs: 17700, dur: "4h 55m", grad: "g9", desc: "Two sisters on opposite sides of a war keep writing letters they can never send — and one of them is delivered forty years late." },
-  { id: "hf3", title: "The Tea Merchant's Daughter", genre: "Historical Fiction", spice: 2, secs: 20100, dur: "5h 35m", grad: "g3", desc: "A tea merchant's daughter in 1840s Boston inherits the family business, the family debts, and a ledger full of secrets." },
-  // Crime (spice 2)
-  { id: "c1", title: "The Informant's Gamble", genre: "Crime", spice: 2, secs: 19200, dur: "5h 20m", grad: "g7", desc: "A low-level informant bets everything on one last tip — and the detective on the other end of the phone is the one person he can't trust." },
-  { id: "c2", title: "Cold Case at Harbor Point", genre: "Crime", spice: 2, secs: 18300, dur: "5h 05m", grad: "g1", desc: "A cold-case detective reopens the drowning that made her career — and realizes the victim's sister has been lying for twenty years." },
-  { id: "c3", title: "The Forger's Confession", genre: "Crime", spice: 2, secs: 17400, dur: "4h 50m", grad: "g6", desc: "A retired art forger is asked to authenticate his own fake — the one hanging in the museum, the one everyone believes is real." },
-  // Adventure (spice 1-2)
-  { id: "a1", title: "The Lost City of Zafir", genre: "Adventure", spice: 1, secs: 21600, dur: "6h 00m", grad: "g9", desc: "A disgraced archaeologist and a teenage cartographer follow a map that shouldn't exist into a desert that isn't on any satellite." },
-  { id: "a2", title: "Across the Burning Sands", genre: "Adventure", spice: 1, secs: 19800, dur: "5h 30m", grad: "g0", desc: "A camel caravan crossing the Empty Quarter finds a well that grants one wish — and every traveler wants a different one." },
-  { id: "a3", title: "The Treasure of Captain Vale", genre: "Adventure", spice: 2, secs: 18600, dur: "5h 10m", grad: "g7", desc: "A salvage diver finds a captain's log pointing to a wreck that sank a hundred years ago — and a crew that never stopped guarding it." },
-  // Contemporary Fiction (spice 2)
-  { id: "cf1", title: "The Bookshop on Maple Street", genre: "Contemporary Fiction", spice: 2, secs: 18000, dur: "5h 00m", grad: "g6", desc: "A woman who stopped reading after her husband died inherits a bookshop — and the regulars refuse to let her sell it." },
-  { id: "cf2", title: "Summer at the Lake House", genre: "Contemporary Fiction", spice: 2, secs: 17400, dur: "4h 50m", grad: "g3", desc: "Three adult siblings return to the lake house to sell it and discover their late mother left each of them a different last letter." },
-  { id: "cf3", title: "The Art of Starting Over", genre: "Contemporary Fiction", spice: 2, secs: 18900, dur: "5h 15m", grad: "g2", desc: "At fifty-two, a corporate lawyer quits everything, buys a food truck, and learns that starting over is mostly learning to ask for help." }
+  // Romance (PG-13, Rated R)
+  { id: "r1", title: "The Lighthouse Keeper's Wife", genre: "Romance", rating: "PG-13", secs: 18720, dur: "5h 12m", grad: "g0", desc: "After twenty years apart, a marine biologist returns to the island where she left her first love — and the lighthouse that never stopped burning for her." },
+  { id: "r2", title: "Second Chance at Willow Creek", genre: "Romance", rating: "PG-13", secs: 17280, dur: "4h 48m", grad: "g5", desc: "A big-city chef inherits a failing diner in her hometown and finds the boy who broke her heart now owns the bakery next door." },
+  { id: "r3", title: "The Last Dance in Lisbon", genre: "Romance", rating: "R", secs: 20100, dur: "5h 35m", grad: "g8", desc: "Two rival dance instructors are forced to choreograph one last show together — and the rehearsal room keeps getting smaller." },
+  // Mystery (PG)
+  { id: "m1", title: "The Clockmaker's Alibi", genre: "Mystery", rating: "PG", secs: 17760, dur: "4h 56m", grad: "g4", desc: "Every clock in the village stopped at 11:47 — the exact minute the mayor was found dead. The clockmaker swears he was home. The clocks say otherwise." },
+  { id: "m2", title: "Murder at the Marigold Hotel", genre: "Mystery", rating: "PG", secs: 16500, dur: "4h 35m", grad: "g6", desc: "A retired schoolteacher checks into a seaside hotel for a quiet weekend and finds the guest in room 12 never checked out — because he never left." },
+  { id: "m3", title: "The Vanishing Violinist", genre: "Mystery", rating: "PG", secs: 18900, dur: "5h 15m", grad: "g1", desc: "A concert violinist vanishes mid-performance, leaving her Stradivarius on the stage and a locked room full of people who all saw nothing." },
+  // Thriller (PG)
+  { id: "t1", title: "The Silent Passenger", genre: "Thriller", rating: "PG", secs: 19500, dur: "5h 25m", grad: "g4", desc: "A rideshare driver picks up a passenger who knows her name, her route, and the secret she buried ten years ago." },
+  { id: "t2", title: "Countdown in the Dark", genre: "Thriller", rating: "PG", secs: 18300, dur: "5h 05m", grad: "g5", desc: "A power grid engineer has 24 hours to find the saboteur inside her own company — before the city goes dark for good." },
+  { id: "t3", title: "The Double Agent's Daughter", genre: "Thriller", rating: "PG", secs: 20700, dur: "5h 45m", grad: "g7", desc: "She grew up believing her father was a diplomat. The day he disappears, three governments come looking for her." },
+  // Fantasy (PG)
+  { id: "f1", title: "The Cartographer's Map of Stars", genre: "Fantasy", rating: "PG", secs: 21600, dur: "6h 00m", grad: "g2", desc: "A mapmaker discovers a coastline that moves — and a kingdom that only exists on maps drawn in starlight." },
+  { id: "f2", title: "The Ember Throne", genre: "Fantasy", rating: "PG", secs: 20400, dur: "5h 40m", grad: "g0", desc: "The youngest of seven heirs must light the ember throne before the winter court claims it — but the flame only answers to the truth." },
+  { id: "f3", title: "Witches of the Hollow Moon", genre: "Fantasy", rating: "PG", secs: 19200, dur: "5h 20m", grad: "g8", desc: "Three estranged sisters inherit their grandmother's spellbook and one very angry moon." },
+  // Science Fiction (PG)
+  { id: "s1", title: "The Last Signal from Europa", genre: "Science Fiction", rating: "PG", secs: 20880, dur: "5h 48m", grad: "g1", desc: "A deep-space listening post picks up a signal from a dead moon — and it's broadcasting the crew's own voices, three days in the future." },
+  { id: "s2", title: "The Memory Merchants", genre: "Science Fiction", rating: "PG", secs: 18000, dur: "5h 00m", grad: "g3", desc: "In a city where memories are currency, a broker who trades in other people's pasts finds a memory of her own that someone paid to erase." },
+  { id: "s3", title: "Starlight Protocol", genre: "Science Fiction", rating: "PG", secs: 19800, dur: "5h 30m", grad: "g7", desc: "The first contact team has one rule: never answer back. Then the signal starts asking questions only they would know." },
+  // Horror (PG)
+  { id: "h1", title: "The House on Hollow Hill", genre: "Horror", rating: "PG", secs: 17400, dur: "4h 50m", grad: "g4", desc: "A house-flipper buys the cheapest house in the county. The house has opinions about being flipped." },
+  { id: "h2", title: "Whispers in the Walls", genre: "Horror", rating: "PG", secs: 18600, dur: "5h 10m", grad: "g5", desc: "A sound engineer moves into a converted recording studio and starts hearing a song that was never recorded — sung in her own voice." },
+  { id: "h3", title: "The Thirteenth Floor", genre: "Horror", rating: "PG", secs: 16800, dur: "4h 40m", grad: "g4", desc: "The elevator in her building has twelve buttons. Her new neighbor keeps pressing a thirteenth." },
+  // Historical Fiction (PG)
+  { id: "hf1", title: "The Seamstress of Paris", genre: "Historical Fiction", rating: "PG", secs: 21000, dur: "5h 50m", grad: "g6", desc: "In occupied Paris, a seamstress hides coded messages in the hems of dresses — until a German officer orders a gown for his wife." },
+  { id: "hf2", title: "Letters from the Front", genre: "Historical Fiction", rating: "PG", secs: 17700, dur: "4h 55m", grad: "g9", desc: "Two sisters on opposite sides of a war keep writing letters they can never send — and one of them is delivered forty years late." },
+  { id: "hf3", title: "The Tea Merchant's Daughter", genre: "Historical Fiction", rating: "PG", secs: 20100, dur: "5h 35m", grad: "g3", desc: "A tea merchant's daughter in 1840s Boston inherits the family business, the family debts, and a ledger full of secrets." },
+  // Crime (PG)
+  { id: "c1", title: "The Informant's Gamble", genre: "Crime", rating: "PG", secs: 19200, dur: "5h 20m", grad: "g7", desc: "A low-level informant bets everything on one last tip — and the detective on the other end of the phone is the one person he can't trust." },
+  { id: "c2", title: "Cold Case at Harbor Point", genre: "Crime", rating: "PG", secs: 18300, dur: "5h 05m", grad: "g1", desc: "A cold-case detective reopens the drowning that made her career — and realizes the victim's sister has been lying for twenty years." },
+  { id: "c3", title: "The Forger's Confession", genre: "Crime", rating: "PG", secs: 17400, dur: "4h 50m", grad: "g6", desc: "A retired art forger is asked to authenticate his own fake — the one hanging in the museum, the one everyone believes is real." },
+  // Adventure (PG)
+  { id: "a1", title: "The Lost City of Zafir", genre: "Adventure", rating: "PG", secs: 21600, dur: "6h 00m", grad: "g9", desc: "A disgraced archaeologist and a teenage cartographer follow a map that shouldn't exist into a desert that isn't on any satellite." },
+  { id: "a2", title: "Across the Burning Sands", genre: "Adventure", rating: "PG", secs: 19800, dur: "5h 30m", grad: "g0", desc: "A camel caravan crossing the Empty Quarter finds a well that grants one wish — and every traveler wants a different one." },
+  { id: "a3", title: "The Treasure of Captain Vale", genre: "Adventure", rating: "PG", secs: 18600, dur: "5h 10m", grad: "g7", desc: "A salvage diver finds a captain's log pointing to a wreck that sank a hundred years ago — and a crew that never stopped guarding it." },
+  // Contemporary Fiction (PG)
+  { id: "cf1", title: "The Bookshop on Maple Street", genre: "Contemporary Fiction", rating: "PG", secs: 18000, dur: "5h 00m", grad: "g6", desc: "A woman who stopped reading after her husband died inherits a bookshop — and the regulars refuse to let her sell it." },
+  { id: "cf2", title: "Summer at the Lake House", genre: "Contemporary Fiction", rating: "PG", secs: 17400, dur: "4h 50m", grad: "g3", desc: "Three adult siblings return to the lake house to sell it and discover their late mother left each of them a different last letter." },
+  { id: "cf3", title: "The Art of Starting Over", genre: "Contemporary Fiction", rating: "PG", secs: 18900, dur: "5h 15m", grad: "g2", desc: "At fifty-two, a corporate lawyer quits everything, buys a food truck, and learns that starting over is mostly learning to ask for help." }
 ];
 
 // Generic chapter-title pool for the Write Your Own outline preview.
@@ -216,14 +216,61 @@ function isSignedIn() { return auth.signedIn === true; }
 // and child accounts are child-safe.
 function isAdultUser() { return isSignedIn() && auth.isAdult === true; }
 
-// Highest spice level this user may see in the catalog.
-function maxSpiceAllowed() { return isAdultUser() ? 4 : 2; }
+// Content ratings (locked Nov 6, 2026 — the old 1–4 level scale is gone).
+// Every book carries one rating, decided at generation. Access is
+// decided by the reader's age, computed in real time from the date
+// of birth on the account — a birthday unlocks the next tier
+// automatically, nothing stored to update. Visitors (not signed in)
+// see PG only.
+const RATINGS = ["PG", "PG-13", "R"];
 
+// Display label: "PG", "PG-13", "Rated R".
+function ratingLabel(rating) { return rating === "R" ? "Rated R" : rating; }
+
+// The reader's age in whole years, from the date of birth on the
+// account. Calendar-based (not milliseconds / 365.25), so the age
+// changes on the birthday itself. null = visitor (age unverified).
+// The demo log-in has no DOB on file, so it signs in as adult.
+function userAgeYears() {
+  if (!isSignedIn()) return null;
+  if (!auth.dob) return 18;
+  const age = ageFromDob(auth.dob);
+  return age === null ? 18 : age;
+}
+
+// Which ratings this reader may open.
+function allowedRatings() {
+  const age = userAgeYears();
+  if (age === null) return ["PG"];
+  if (age >= 18) return ["PG", "PG-13", "R"];
+  if (age >= 13) return ["PG", "PG-13"];
+  return ["PG"];
+}
+
+function isRatingAllowed(rating) { return allowedRatings().includes(rating); }
+function isBookLocked(book) { return !!book && !isRatingAllowed(book.rating); }
+
+// The age a rating unlocks at (for the lock message).
+function ratingUnlockAge(rating) {
+  return rating === "R" ? 18 : rating === "PG-13" ? 13 : 0;
+}
+
+// Whole-year age from a "YYYY-MM-DD" date string, computed by
+// calendar date so the birthday itself counts. Timezone-safe: the
+// string is parsed as numbers, never as a UTC midnight.
 function ageFromDob(dobStr) {
   if (!dobStr) return null;
-  const dob = new Date(dobStr);
-  if (isNaN(dob.getTime())) return null;
-  return (Date.now() - dob.getTime()) / (365.25 * 24 * 3600 * 1000);
+  const parts = String(dobStr).split("-");
+  if (parts.length < 3) return null;
+  const y = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10);
+  const d = parseInt(parts[2], 10);
+  if (isNaN(y) || isNaN(m) || isNaN(d)) return null;
+  const now = new Date();
+  let age = now.getFullYear() - y;
+  const monthDiff = (now.getMonth() + 1) - m;
+  if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < d)) age--;
+  return age;
 }
 
 function persistAuth() {
@@ -247,8 +294,8 @@ function signIn(name, dob) {
   persistAuth();
   updateAuthUI();
   updateWriteModeUI();
-  renderSpiceFilter();
-  renderPfSpice();
+  renderRatingFilter();
+  renderPfRatings();
   if (readerBook) renderReader();
   renderChapterList();
   renderBooks();
@@ -264,8 +311,8 @@ function signOut() {
   }
   updateAuthUI();
   updateWriteModeUI();
-  renderSpiceFilter();
-  renderPfSpice();
+  renderRatingFilter();
+  renderPfRatings();
   if (readerBook) renderReader();
   renderChapterList();
   renderBooks();
@@ -321,7 +368,7 @@ function updateWriteModeUI() {
   badge.className = "badge " + (mode === "child" ? "badge-child" : "badge-adult");
   $("#writeModeDesc").textContent = mode === "child"
     ? "Child mode — the AI writes age-appropriate books only: no sexual content, no adult themes. The questions and guidance are written for young writers."
-    : "Adult mode — unchained: no holds, no blocks, no spice cap. The writer has full creative freedom.";
+    : "Adult mode — unchained: no holds, no blocks, no rating cap. The writer has full creative freedom.";
   $("#writeModeLock").textContent = !isSignedIn()
     ? "You're browsing as a visitor, so Child mode is on — we can't verify age without an account. Your mode is set by the birthday on your account once you sign up."
     : (!isAdultUser()
@@ -329,10 +376,10 @@ function updateWriteModeUI() {
       : "Your mode is set by the birthday on your account — adult access is granted. The switch is controlled by us, based on your birthday.");
   $("#writeFlowMode").textContent = mode === "child"
     ? "Mode: Child — age-appropriate. Your book will contain no sexual content and no adult themes."
-    : "Mode: Adult — unchained. No holds, no blocks, no spice cap. (No sexual content involving minors, ever.)";
+    : "Mode: Adult — unchained. No holds, no blocks, no rating cap. (No sexual content involving minors, ever.)";
   $("#wfStep1Note").textContent = mode === "child"
     ? "Child mode: your book will be age-appropriate — no sexual content, no adult themes."
-    : "Adult mode: unchained — no holds, no blocks, no spice cap. (The one hard rule still applies: no sexual content involving minors, ever.)";
+    : "Adult mode: unchained — no holds, no blocks, no rating cap. (The one hard rule still applies: no sexual content involving minors, ever.)";
   $("#wfRevisionModeNote").textContent = mode === "child"
     ? "In Child mode, every revision stays age-appropriate too."
     : "In Adult mode, revisions are unchained — the same freedom as the first draft. (No sexual content involving minors, ever.)";
@@ -353,39 +400,76 @@ function revisionQuestionsForMode() {
 }
 
 /* ---------- Age-based catalog filtering ---------- */
-/* The spice filter doubles as the age filter. A child account or a
-   visitor only ever sees spice 1–2; spice 3–4 are hidden from the
-   grid and are not offered as filter choices. An adult account sees
-   the full catalog. */
+/* The rating filter doubles as the age filter. The reader's age
+   sets which ratings are open; the filter lets them narrow within
+   what is open to them — a child account or a visitor is only ever
+   offered PG (and PG-13 from 13), Rated R only from 18. Locked
+   books stay visible in the grid with a grey lock icon (see
+   bookCardHTML); the filter never hides a book for age reasons. */
 
-function renderSpiceFilter() {
-  const sel = $("#spiceFilter");
-  const adult = isAdultUser();
-  const opts = [[0, "Show all"], [1, "1 — Sweet"], [2, "2 — Mild"]];
-  if (adult) opts.push([3, "3 — Steamy"], [4, "4 — Open-door"]);
+function renderRatingFilter() {
+  const sel = $("#ratingFilter");
+  const allowed = allowedRatings();
+  const opts = [["", "Show all"]].concat(allowed.map(r => [r, ratingLabel(r)]));
   sel.innerHTML = opts.map(o => '<option value="' + o[0] + '">' + o[1] + "</option>").join("");
-  if (maxSpice > maxSpiceAllowed()) maxSpice = 0;
-  sel.value = String(maxSpice);
+  if (ratingFilter && !allowed.includes(ratingFilter)) ratingFilter = "";
+  sel.value = ratingFilter;
 }
 
-function renderPfSpice() {
-  const sel = $("#pfSpice");
-  const adult = isAdultUser();
-  const prev = sel.value;
-  const opts = [[1, "1 — Sweet"], [2, "2 — Mild"]];
-  if (adult) opts.push([3, "3 — Steamy"], [4, "4 — Open-door"]);
-  sel.innerHTML = opts.map(o => '<option value="' + o[0] + '">' + o[1] + "</option>").join("");
-  sel.value = (prev === "3" || prev === "4") ? (adult ? prev : "2") : (prev || "2");
-  const hint = $("#pfSpiceHint");
-  if (hint) hint.textContent = adult ? "" : "Child-safe accounts only see spice 1–2.";
+// Made For You rating checkboxes (PG / PG-13 / Rated R). Age decides
+// which boxes can be checked: under 13 → PG only; 13–17 → PG +
+// PG-13; 18+ → all three. A box that is not available is disabled
+// and unchecked. Defaults (until the user touches a box): PG and
+// PG-13 checked when available; Rated R starts unchecked — it is
+// only ever picked when the user explicitly checks it.
+const PF_RATING_BOXES = { "PG": "pfRatingPG", "PG-13": "pfRatingPG13", "R": "pfRatingR" };
+let pfRatingsTouched = false;
+
+function renderPfRatings() {
+  const allowed = allowedRatings();
+  Object.keys(PF_RATING_BOXES).forEach(rating => {
+    const box = document.getElementById(PF_RATING_BOXES[rating]);
+    if (!box) return;
+    const available = allowed.includes(rating);
+    box.disabled = !available;
+    if (!available) box.checked = false;
+    else if (!pfRatingsTouched) box.checked = rating !== "R";
+  });
+  const hint = $("#pfRatingsHint");
+  if (hint) {
+    hint.textContent = allowed.includes("R")
+      ? "Leave all unchecked for a random mix of PG and PG-13. Rated R is only generated if you check it."
+      : allowed.includes("PG-13")
+        ? "Rated R unlocks when you turn 18. Leave all unchecked for a random mix of PG and PG-13."
+        : "PG-13 unlocks when you turn 13 and Rated R at 18 — books unlock for your age automatically.";
+  }
+}
+
+// The weekly draw for Made For You: a random rating from the boxes
+// the user checked. If none are checked, a random rating from what
+// is available for their age — never Rated R unless they checked it.
+function drawPersonalizedRating() {
+  const checked = RATINGS.filter(r => {
+    const box = document.getElementById(PF_RATING_BOXES[r]);
+    return box && box.checked && !box.disabled;
+  });
+  const pool = checked.length > 0
+    ? checked
+    : allowedRatings().filter(r => r !== "R");
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
 function updateCatalogNote() {
   const note = $("#catalogAgeNote");
   if (!note) return;
-  note.textContent = isAdultUser()
-    ? "Showing the full catalog, including steamy books (spice 3–4)."
-    : "Showing age-appropriate books (spice 1–2). Sign in with an adult account to see the full catalog, including steamy books.";
+  const allowed = allowedRatings();
+  if (allowed.length === 3) {
+    note.textContent = "Showing the full catalog — PG, PG-13, and Rated R.";
+  } else if (allowed.includes("PG-13")) {
+    note.textContent = "Showing PG and PG-13 books. Rated R unlocks when you turn 18.";
+  } else {
+    note.textContent = "Showing PG books only. PG-13 unlocks when you turn 13 and Rated R at 18 — sign up with your date of birth and books unlock for your age automatically.";
+  }
 }
 
 /* ---------- Tabs ---------- */
@@ -424,7 +508,7 @@ $$("#mainNav a").forEach(a => a.addEventListener("click", () => mainNav.classLis
 /* ---------- Daily Books: genre pills + cards ---------- */
 
 let activeGenre = "All";
-let maxSpice = 0; // 0 = show all
+let ratingFilter = ""; // "" = show all ratings
 
 function voiceOptionsHTML(selectedName) {
   const groups = { Female: [], Male: [] };
@@ -455,11 +539,12 @@ function renderGenrePills() {
 }
 
 function filteredBooks() {
-  const cap = maxSpiceAllowed();
+  // Locked books stay visible in the grid (with a grey lock icon) —
+  // the age gate controls opening a book, not seeing it. The filter
+  // only narrows by rating, within what is open to this reader.
   return BOOKS.filter(b =>
     (activeGenre === "All" || b.genre === activeGenre) &&
-    b.spice <= cap &&
-    (maxSpice === 0 || b.spice <= maxSpice)
+    (ratingFilter === "" || b.rating === ratingFilter)
   );
 }
 
@@ -520,15 +605,19 @@ function dailyShuffle(list, dateKey) {
 
 /* Book cards, post-style (TY Nov 5 ~10:43 PM): each card reads like a
    post — a slim gradient band, a title header, a meta line (genre,
-   spice, chapter count, length), the opening text, and the Listen /
-   Read actions with the voice picker. Written from scratch for
-   YourDailyBook; no code copied from any other project.
+   rating, chapter count, length), the opening text, and the Listen /
+   Read actions with the voice picker. A locked book (rating above
+   what this reader may open) shows a small grey lock icon and stays
+   visible in the grid — clicking it shows the age message, never
+   the book. Written from scratch for YourDailyBook; no code copied
+   from any other project.
    opts.removable adds an "✕ Remove" button (Currently Reading only).
    opts.continuable adds a "▶ Continue" button (Currently Reading
    only) that resumes the book from its saved position. */
 function bookCardHTML(book, opts) {
   const preview = bookPreviewText(book)[0];
   const signedIn = isSignedIn();
+  const locked = isBookLocked(book);
   const removeBtn = (opts && opts.removable)
     ? '<button class="btn btn-ghost btn-sm remove-cr" type="button" data-book-id="' + book.id + '" title="Remove from Currently Reading">✕ Remove</button>'
     : "";
@@ -536,11 +625,14 @@ function bookCardHTML(book, opts) {
     ? '<button class="btn btn-dark btn-sm continue-book" type="button" data-book-id="' + book.id + '" title="Pick up where you left off">▶ Continue</button>'
     : "";
   return `
-    <article class="book-card" data-book-id="${book.id}">
+    <article class="book-card${locked ? " locked" : ""}" data-book-id="${book.id}">
       <div class="book-cover ${book.grad}">
         <div class="cover-top">
           <span class="cover-genre">${escapeHtml(book.genre)}</span>
-          <span class="badge badge-ai">AI-Generated</span>
+          <span class="cover-badges">
+            ${locked ? '<span class="lock-icon" title="' + escapeHtml(lockMessage(book)) + '">🔒</span>' : ""}
+            <span class="badge badge-ai">AI-Generated</span>
+          </span>
         </div>
       </div>
       <div class="book-body">
@@ -549,7 +641,7 @@ function bookCardHTML(book, opts) {
           <span>${escapeHtml(book.genre)}</span>
           <span>📖 13 chapters</span>
           <span>⏱ ${book.dur}</span>
-          <span class="badge badge-spice">Spice ${book.spice}</span>
+          <span class="badge badge-rating">${ratingLabel(book.rating)}</span>
           <span class="badge badge-new">New today</span>
         </p>
         <p class="book-desc">${escapeHtml(book.desc)}</p>
@@ -587,8 +679,7 @@ function wireBookGrid(grid) {
   $$(".play-book", grid).forEach(btn => btn.addEventListener("click", () => {
     const book = BOOKS.find(x => x.id === btn.dataset.bookId);
     const voiceSel = grid.querySelector('[data-book-voice="' + book.id + '"]');
-    openReader(book);
-    loadBook(book, voiceSel ? voiceSel.value : "Warm", true);
+    if (openReader(book)) loadBook(book, voiceSel ? voiceSel.value : "Warm", true);
   }));
   $$("[data-book-voice]", grid).forEach(sel => sel.addEventListener("change", () => {
     const book = BOOKS.find(x => x.id === sel.dataset.bookVoice);
@@ -612,7 +703,7 @@ function renderBooks() {
   updateCatalogNote();
   $("#bookCount").textContent = list.length + " book" + (list.length === 1 ? "" : "s") + " · New today";
   if (list.length === 0) {
-    grid.innerHTML = '<div class="empty-state"><h3>No books match that filter</h3><p>Try a different genre or spice level.</p></div>';
+    grid.innerHTML = '<div class="empty-state"><h3>No books match that filter</h3><p>Try a different genre or rating.</p></div>';
   } else {
     grid.innerHTML = list.map(b => bookCardHTML(b)).join("");
     wireBookGrid(grid);
@@ -663,13 +754,14 @@ function removeCurrentlyReading(bookId) {
   renderCurrentlyReading();
 }
 
-// Books in Currently Reading, most recent first, filtered by what
-// the user is allowed to see (age cap, same as the catalog).
+// Books in Currently Reading, most recent first. No age filter
+// here: a book only enters Currently Reading by being opened, and
+// a locked book cannot be opened — so every book in this list was
+// openable when it was added, and ratings never change.
 function currentlyReadingBooks() {
-  const cap = maxSpiceAllowed();
   return currentlyReadingIds()
     .map(id => BOOKS.find(b => b.id === id))
-    .filter(b => b && b.spice <= cap);
+    .filter(b => b);
 }
 
 function renderCurrentlyReading() {
@@ -774,12 +866,11 @@ function saveAudioProgress() {
 // With no saved position yet, it starts at the beginning.
 function continueBook(book, voice) {
   if (!book) return;
-  openReader(book);
-  loadBook(book, voice || "Warm", false);
+  if (openReader(book)) loadBook(book, voice || "Warm", false);
 }
 
-$("#spiceFilter").addEventListener("change", e => {
-  maxSpice = parseInt(e.target.value, 10) || 0;
+$("#ratingFilter").addEventListener("change", e => {
+  ratingFilter = e.target.value || "";
   renderBooks();
 });
 
@@ -831,6 +922,8 @@ function chapterStartSecondsFor(book, idx) {
 }
 
 function loadBook(book, voice, autoplay) {
+  // A locked book never loads into the player — the age message instead.
+  if (isBookLocked(book)) { showAgeLockMessage(book); return false; }
   player.current = book;
   // Resume from the saved listening position (if any) — do not restart
   // from 0. Clamped to the book length and, for visitors, to the
@@ -851,6 +944,7 @@ function loadBook(book, voice, autoplay) {
   renderChapterList();
   updatePlayerUI();
   if (autoplay) setPlaying(true);
+  return true;
 }
 
 // A visitor hit the end of the audio preview: stop and open the gate.
@@ -871,7 +965,7 @@ function updatePlayerSub() {
   const ch = currentChapterIndex() + 1;
   $("#playerSub").textContent =
     player.current.genre + " · Chapter " + ch + " of " + CHAPTER_COUNT +
-    " · Narrated by " + player.voice + " · Spice " + player.current.spice +
+    " · Narrated by " + player.voice + " · " + ratingLabel(player.current.rating) +
     (isSignedIn() ? "" : " · Preview");
 }
 
@@ -893,7 +987,11 @@ function setPlaying(playing) {
   $("#playPauseBtn").textContent = playing ? "⏸" : "▶";
   $("#playPauseBtn").setAttribute("aria-label", playing ? "Pause" : "Play");
   if (playing) {
-    if (!player.current) { loadBook(BOOKS[0], "Warm", false); }
+    if (!player.current) {
+      // Start with the first book this reader may open — never a
+      // locked one (BOOKS[0] is PG-13, so it cannot be the default).
+      loadBook(BOOKS.find(b => isRatingAllowed(b.rating)) || BOOKS[0], "Warm", false);
+    }
     if (!player.timer) {
       player.timer = setInterval(tick, 250);
     }
@@ -1079,6 +1177,25 @@ setInterval(() => { if (player.sleepMins > 0) updateSleepBtn(); }, 15000);
      the sign-up modal.
    - Signed-in user: the full story text + full audio playback. */
 
+/* ---------- Age lock message ---------- */
+/* The message for a locked book: which rating it is and when it
+   unlocks. No preview text, no audio — the message is all the
+   reader gets. */
+
+function lockMessage(book) {
+  const age = ratingUnlockAge(book.rating);
+  const label = ratingLabel(book.rating);
+  if (!isSignedIn()) {
+    return "This book is rated " + label + ". It unlocks when you turn " + age + ". Sign up with your date of birth and books unlock for your age automatically.";
+  }
+  return "This book is rated " + label + ". It unlocks when you turn " + age + ".";
+}
+
+function showAgeLockMessage(book) {
+  $("#ageLockText").textContent = lockMessage(book);
+  openModal("ageLockModal");
+}
+
 let readerBook = null;
 // The saved reading position for the book currently in the reader:
 // { paragraph, chapter } — or null when starting at the beginning.
@@ -1106,6 +1223,9 @@ function resumeParagraphFor(book, paras) {
 }
 
 function openReader(book) {
+  if (!book) return false;
+  // A locked book never opens — the age message is all the reader gets.
+  if (isBookLocked(book)) { showAgeLockMessage(book); return false; }
   readerBook = book;
   markCurrentlyReading(book);
   document.body.classList.add("reading");
@@ -1121,6 +1241,7 @@ function openReader(book) {
   } else {
     window.scrollTo(0, 0);
   }
+  return true;
 }
 
 function closeReader() {
@@ -1135,6 +1256,26 @@ function renderReader() {
   const wrap = $("#readerContent");
   const book = readerBook;
   if (!book) { wrap.innerHTML = ""; return; }
+  // The book the reader has open became locked (e.g. the user signed
+  // out while reading a Rated R book): show the age message instead
+  // of the text — no preview, no audio.
+  if (isBookLocked(book)) {
+    wrap.innerHTML = `
+    <article class="reader">
+      <div class="reader-cover ${book.grad}">
+        <span class="cover-genre">${escapeHtml(book.genre)} · New today</span>
+        <div class="cover-title">${escapeHtml(book.title)}</div>
+        <div class="cover-meta">${book.dur} · ${CHAPTER_COUNT} chapters · ${ratingLabel(book.rating)}</div>
+      </div>
+      <div class="gate-box">
+        <h3>🔒 This book is locked for now</h3>
+        <p class="muted">${escapeHtml(lockMessage(book))}</p>
+        <button class="btn btn-primary" id="ageLockBackBtn" type="button">Back to Daily Books</button>
+      </div>
+    </article>`;
+    $("#ageLockBackBtn").addEventListener("click", closeReader);
+    return;
+  }
   const voice = player.current && player.current.id === book.id ? player.voice : "Warm";
   // The paragraphs shown here, and where the user left off in them.
   const paras = isSignedIn() ? bookFullText(book) : bookPreviewText(book);
@@ -1153,12 +1294,12 @@ function renderReader() {
       <div class="reader-cover ${book.grad}">
         <span class="cover-genre">${escapeHtml(book.genre)} · New today</span>
         <div class="cover-title">${escapeHtml(book.title)}</div>
-        <div class="cover-meta">${book.dur} · ${CHAPTER_COUNT} chapters · Spice ${book.spice}</div>
+        <div class="cover-meta">${book.dur} · ${CHAPTER_COUNT} chapters · ${ratingLabel(book.rating)}</div>
       </div>`;
   const headHTML = `
       <div class="reader-head">
         <h2>${escapeHtml(book.title)}</h2>
-        <p class="muted">${escapeHtml(book.genre)} · ${book.dur} · 13 chapters · <span class="badge badge-spice">Spice ${book.spice}</span> <span class="badge badge-ai-dark">AI-Generated</span> <span class="badge badge-new">New today</span></p>
+        <p class="muted">${escapeHtml(book.genre)} · ${book.dur} · 13 chapters · <span class="badge badge-rating">${ratingLabel(book.rating)}</span> <span class="badge badge-ai-dark">AI-Generated</span> <span class="badge badge-new">New today</span></p>
       </div>`;
   const voiceHTML = `
         <label class="reader-voice">Narrator
@@ -1258,7 +1399,7 @@ $("#personalizeForm").addEventListener("submit", e => {
   const name = $("#pfName").value.trim() || "you";
   const about = $("#pfAbout").value.trim();
   const genres = $$("#pfGenres input[type=checkbox]:checked").map(c => c.value);
-  const spice = $("#pfSpice").value;
+  const rating = drawPersonalizedRating();
   const voice = $("#pfVoice").value;
   const genre = genres.length ? genres[0] : "Contemporary Fiction";
   const preview = $("#personalPreview");
@@ -1267,7 +1408,7 @@ $("#personalizeForm").addEventListener("submit", e => {
     <span class="badge badge-new" style="margin-left:6px;">This week's preview</span>
     <h3 class="mt-2">A ${escapeHtml(genre)} story for ${escapeHtml(name)}</h3>
     <p class="muted">Your weekly book — about 30 minutes of listening. ${about ? "Built from what you told us: “" + escapeHtml(about.slice(0, 120)) + (about.length > 120 ? "…" : "") + "”" : "Built from your details, in the genres you picked."}</p>
-    <p class="small"><strong>Genre:</strong> ${escapeHtml(genres.join(", ") || "Surprise me")} · <strong>Spice:</strong> ${spice} · <strong>Voice:</strong> ${escapeHtml(voice)}</p>
+    <p class="small"><strong>Genre:</strong> ${escapeHtml(genres.join(", ") || "Surprise me")} · <strong>Rating:</strong> ${ratingLabel(rating)} · <strong>Voice:</strong> ${escapeHtml(voice)}</p>
     <p class="small muted">This is a preview of how your personalized book is shaped — the real one is written fresh each week from your details. Change your details anytime on your account page and your next book changes with them.</p>
     <button class="btn btn-primary" type="button" id="previewPlayBtn">▶ Listen to a Sample Chapter</button>
     <p class="small muted mt-2">Sample playback is simulated in this preview — the real player plays your full weekly book.</p>`;
@@ -1401,8 +1542,12 @@ $("#loginForm").addEventListener("submit", e => {
   $("#wfGenre").innerHTML = GENRES.map(g => "<option>" + escapeHtml(g) + "</option>").join("");
   renderPfGenres();
   renderGenrePills();
-  renderSpiceFilter(); // age-capped spice choices for the catalog
-  renderPfSpice();     // age-capped spice choices for Made For You
+  renderRatingFilter(); // age-capped rating choices for the catalog
+  renderPfRatings();     // age-capped rating choices for Made For You
+  // Once the user touches a rating checkbox, their choices are theirs
+  // — renderPfRatings stops re-applying the defaults (see the
+  // pfRatingsTouched flag). Availability (disabled) is still enforced.
+  $$("#pfRatings input[type=checkbox]").forEach(cb => cb.addEventListener("change", () => { pfRatingsTouched = true; }));
   updateWriteModeUI(); // child/adult toggle state for Write Your Own
   renderBooks();
   renderChapterList();
