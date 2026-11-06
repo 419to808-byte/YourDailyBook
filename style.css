@@ -201,7 +201,7 @@ img { max-width: 100%; }
 .genre-pill.active { background: var(--accent); border-color: var(--accent); color: var(--navy); }
 .filter-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
 .filter-row label { font-size: 0.9rem; font-weight: 600; color: var(--ink-soft); }
-select, input[type="text"], input[type="email"], input[type="date"], textarea {
+select, input[type="text"], input[type="email"], input[type="password"], input[type="date"], textarea {
   font-family: var(--font-sans); font-size: 0.98rem; color: var(--ink);
   padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-sm);
   background: var(--surface); width: 100%;
@@ -488,7 +488,19 @@ body[data-auth-page] { padding-bottom: 24px; }
   .player-tools select { max-width: 110px; }
 }
 @media (max-width: 640px) {
-  body { padding-bottom: 118px; }
+  /* Phone = the same laptop layout, compacted — NOT a stacked,
+     dumbed-down layout (TY Nov 6: clean transfer, look the same
+     as laptop or as close as possible). Nothing below re-stacks,
+     re-columns, or re-flows the page into a different design. */
+  body { padding-bottom: 72px; } /* room for the single-row sticky player */
+  .header-inner { gap: 10px; padding: 12px 16px; }
+  .logo { font-size: 1.15rem; }
+  .logo-mark { width: 30px; height: 30px; }
+  .header-actions .btn { padding: 8px 12px; }
+  /* Signed-in greeting + header Sign Out hide on phones — the name
+     and a Sign Out button both live on the Settings page. */
+  .auth-greeting { display: none; }
+  #signoutBtn { display: none; }
   .main-nav {
     display: none; position: absolute; top: 100%; left: 0; right: 0;
     background: var(--surface); flex-direction: column; padding: 10px 16px 16px;
@@ -498,18 +510,54 @@ body[data-auth-page] { padding-bottom: 24px; }
   .main-nav a { padding: 10px 8px; }
   .nav-toggle { display: block; }
   .header-actions #loginBtn { display: none; }
-  .book-grid { grid-template-columns: 1fr; }
-  .policy-grid { grid-template-columns: 1fr; }
-  .footer-grid { grid-template-columns: 1fr; }
+  .book-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .policy-grid { grid-template-columns: repeat(2, 1fr); }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
   .tagline-strip { padding: 12px 0 2px; }
   .tagline-strip h1 { font-size: 1.05rem; }
   .section { padding: 44px 0; }
-  /* Main tabs stay big and dominant on small screens — stacked full-width. */
-  .tabs { flex-direction: column; }
-  .tab-btn { font-size: 1.1rem; padding: 14px; }
-  .player-inner { flex-wrap: wrap; gap: 8px; padding: 10px 14px; }
-  .player-info { width: calc(100% - 130px); }
-  .player-progress { order: 3; flex-basis: 100%; }
+  /* Main tabs stay in ONE row, all four visible with full labels.
+     Subtitles hide at phone width (the titles carry the labels);
+     titles may wrap to two lines so every tab keeps its full name. */
+  .tabs { flex-direction: row; gap: 6px; }
+  .tab-btn { font-size: 0.8rem; padding: 10px 4px; gap: 0; }
+  .tab-btn .tab-sub { display: none; }
+  /* Cards: same post-style card, tighter, so two fit side by side. */
+  .book-cover { height: 56px; padding: 10px 12px; }
+  .book-cover .cover-top { flex-wrap: wrap; row-gap: 2px; }
+  .book-cover .cover-genre { font-size: 0.62rem; letter-spacing: 0.06em; }
+  .book-body { padding: 12px; gap: 8px; }
+  .book-title { font-size: 1.05rem; }
+  .book-desc { font-size: 0.88rem; }
+  .book-meta { gap: 8px; font-size: 0.8rem; }
+  .badge { font-size: 0.68rem; padding: 2px 6px; }
+  .book-actions { flex-direction: column; align-items: stretch; }
+  .book-actions .btn { width: 100%; }
+  .voice-select { width: 100%; }
+  /* Sticky player: stays a SINGLE row — cover + info + controls +
+     progress inline, nothing wraps below. The tools (voice, speed,
+     sleep, chapters) do not fit in the row at phone width and are
+     hidden here — voice switching stays on every card and in the
+     reader, chapters stay reachable via prev/next. */
+  .player-inner { flex-wrap: nowrap; gap: 8px; padding: 8px 12px; }
+  .player-cover { width: 36px; height: 36px; font-size: 0.9rem; border-radius: 6px; }
+  .player-info { flex: 1 1 auto; min-width: 0; width: auto; }
+  .player-controls { gap: 4px; }
+  .player-btn { width: 32px; height: 32px; }
+  .player-btn.play { width: 40px; height: 40px; }
+  .player-progress { flex: 1 1 64px; min-width: 64px; gap: 6px; }
+  .player-time { display: none; }
+  .player-tools { display: none; }
+  .chapter-panel { bottom: 64px; }
+  /* iOS Safari auto-zooms any input under 16px on focus — keep
+     every text-like input at 16px on phones. */
+  select, input[type="text"], input[type="email"], input[type="date"],
+  input[type="password"], textarea { font-size: 16px; }
+  /* Reader: same view, slightly tighter. */
+  .reader-cover { padding: 20px 18px; }
+  .reader-cover .cover-title { font-size: 1.5rem; }
+  .reader-head h2 { font-size: 1.6rem; }
+  .reader-text { font-size: 1.05rem; line-height: 1.8; }
 }
 
 /* ---------------- Reader view + preview gate ---------------- */
