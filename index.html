@@ -61,7 +61,11 @@
 
 <!-- ===== Daily Books panel ===== -->
 <section class="tab-panel active" id="panel-daily" role="tabpanel" aria-label="Daily Books">
+  <div id="dailyTodayView">
   <div class="genre-row" id="genreRow" role="group" aria-label="Filter by genre"></div>
+  <div class="browse-link-row">
+    <button class="btn btn-ghost btn-sm" id="browseAllBtn" type="button">Browse all books →</button>
+  </div>
   <div class="section-head daily-head">
     <h2>Today's books — one in every genre</h2>
     <p>A brand-new book in each genre lands every morning. Pick a genre, pick a voice, press play.</p>
@@ -88,6 +92,53 @@
   <section class="closing-value" aria-label="About YourDailyBook">
     <span class="eyebrow">Audiobook-first · All genres · For all ages</span>
     <p>Every book is written by AI and read by an AI voice — and we say so openly. Listener $9.99/mo · Author $24.99/mo · Cancel anytime.</p>
+  </section>
+  </div><!-- /dailyTodayView -->
+
+  <!-- ===== Back-catalog browse view ===== -->
+  <!-- The full catalog, organized by genre first, then newest first
+       inside each genre — with filters (AI vs human submission,
+       author, rating, New today), a title/author search, a
+       publication-date picker (the calendar view), and pagination
+       (20 books per page). A view inside the Daily Books panel, not
+       a separate page and not a fifth main tab. Reuses the same
+       post-style cards, badges, preview behavior, and rating lock
+       as the daily grid. -->
+  <section id="browseView" class="hidden" aria-label="Browse all books">
+    <button class="btn btn-ghost btn-sm" id="browseBackBtn" type="button">← Back to Today's books</button>
+    <div class="section-head daily-head mt-2">
+      <h2>Browse all books</h2>
+      <p>The full catalog — newest first in each genre. Filter it, search it, or jump to a publication date.</p>
+    </div>
+    <div class="browse-controls">
+      <div class="genre-row" id="browseGenreRow" role="group" aria-label="Browse by genre"></div>
+      <div class="browse-filters">
+        <label class="browse-field browse-search">Search
+          <input type="search" id="browseSearch" placeholder="Title or author…" aria-label="Search by title or author">
+        </label>
+        <label class="browse-field">Source
+          <select id="browseSource" aria-label="Filter by source">
+            <option value="all">All books</option>
+            <option value="ai">AI books</option>
+            <option value="human">Human submissions</option>
+          </select>
+        </label>
+        <label class="browse-field">Rating
+          <select id="browseRating" aria-label="Filter by rating"></select>
+        </label>
+        <label class="browse-field">Author
+          <select id="browseAuthor" aria-label="Filter by author"></select>
+        </label>
+        <label class="browse-field browse-check"><input type="checkbox" id="browseNewToday"> New today only</label>
+        <label class="browse-field">Published on
+          <input type="date" id="browseDate" aria-label="Filter by publication date">
+        </label>
+        <button class="btn btn-ghost btn-sm" id="browseResetBtn" type="button">Reset filters</button>
+      </div>
+    </div>
+    <p class="small muted" id="browseCount"></p>
+    <div id="browseResults"></div>
+    <nav class="browse-pagination" id="browsePagination" aria-label="Browse pages"></nav>
   </section>
 </section>
 

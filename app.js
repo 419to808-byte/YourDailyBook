@@ -83,6 +83,20 @@ const BOOKS = [
   { id: "cf3", title: "The Art of Starting Over", genre: "Contemporary Fiction", rating: "PG", secs: 18900, dur: "5h 15m", grad: "g2", desc: "At fifty-two, a corporate lawyer quits everything, buys a food truck, and learns that starting over is mostly learning to ask for help." }
 ];
 
+// Back-catalog fields (Nov 6, 2026): every catalog book carries
+// its author and its publication date, so the browse view can
+// organize by genre then date, and filter by author and source.
+// AI books are authored "YourDailyBook"; approved human submissions
+// carry the writer's name and humanWritten: true (see the
+// generator's submissions module). Demo books are all published
+// today — they are the launch-day placeholders; real generated
+// books carry their real publication date.
+BOOKS.forEach(b => {
+  b.author = b.author || "YourDailyBook";
+  b.createdAt = b.createdAt || todayKey();
+  b.humanWritten = !!b.humanWritten;
+});
+
 // Generic chapter-title pool for the Write Your Own outline preview.
 // PLACEHOLDER structure only — no real book text is generated here.
 const OUTLINE_TITLES = [
@@ -300,6 +314,8 @@ function signIn(name, dob) {
   if (readerBook) renderReader();
   renderChapterList();
   renderBooks();
+  renderBrowseRatingFilter(); // browse rating options follow the new age
+  renderBrowse(); // locks refresh in the browse view too
 }
 
 function signOut() {
@@ -318,6 +334,8 @@ function signOut() {
   if (readerBook) renderReader();
   renderChapterList();
   renderBooks();
+  renderBrowseRatingFilter(); // browse rating options follow the new age
+  renderBrowse(); // locks refresh in the browse view too
 }
 
 function updateAuthUI() {
@@ -797,6 +815,309 @@ function renderBooks() {
     wireBookGrid(grid);
   }
   renderCurrentlyReading();
+}
+
+/* ---------- Back-catalog browse view ---------- */
+/* The full catalog, organized by genre first, then newest first
+   inside each genre (design note, Nov 5 ~11:17 PM): filters for
+   AI vs human submission, author, rating, and "New today"; a
+   title/author search; a publication-date picker (the calendar
+   view); pagination with numbered tabs at the bottom — 20 books
+   per page, Prev/Next, First/Last. A view inside the Daily Books
+   panel, not a separate page and not a fifth main tab. It reuses
+   the same post-style cards (bookCardHTML), badges, preview
+   behavior, and rating lock as the daily grid — nothing is
+   reimplemented. The daily shuffle, the player, and the other
+   three tabs are untouched. */
+
+const BROWSE_PAGE_SIZE = 20;
+
+// Current browse state. page resets to 1 whenever the genre,
+// filter, or search changes (see browseApplyState).
+const browseState = {
+  genre: "All",
+  source: "all",   // "all" | "ai" | "human"
+  rating: "",      // "" = all ratings
+  author: "",      // "" = all authors
+  newToday: false,
+  date: "",        // "YYYY-MM-DD" or ""
+  query: "",       // search text
+  page: 1
+};
+
+// A book's publication date ("YYYY-MM-DD"), or "" when unknown.
+function catalogBookDate(book) { return (book && book.createdAt) || ""; }
+
+// True when the book was published on the given day (default today).
+function isNewTodayBook(book, dateKey) {
+  return catalogBookDate(book) === (dateKey || todayKey());
+}
+
+// Authors present in the catalog, in first-seen order — for the
+// author filter dropdown. Today that is just "YourDailyBook"; once
+// approved human submissions exist, their names appear here.
+function browseAuthors(books) {
+  const seen = [];
+  (books || BOOKS).forEach(b => {
+    const a = b.author || "YourDailyBook";
+    if (seen.indexOf(a) < 0) seen.push(a);
+  });
+  return seen;
+}
+
+// Filter a book list by the browse state. Every filter ANDs with
+// the others. Locked books are NOT excluded here — the age gate
+// controls opening a book, not seeing it (same as the daily grid);
+// the rating select only ever offers ratings open to this reader
+// (see renderBrowseRatingFilter), so a filter can never hide a
+// book for age reasons.
+function catalogFilterBooks(books, state, opts) {
+  const today = (opts && opts.today) || todayKey();
+  const q = (state.query || "").trim().toLowerCase();
+  return (books || []).filter(b => {
+    if (state.genre && state.genre !== "All" && b.genre !== state.genre) return false;
+    if (state.source === "ai" && b.humanWritten) return false;
+    if (state.source === "human" && !b.humanWritten) return false;
+    if (state.rating && b.rating !== state.rating) return false;
+    if (state.author && (b.author || "YourDailyBook") !== state.author) return false;
+    if (state.newToday && catalogBookDate(b) !== today) return false;
+    if (state.date && catalogBookDate(b) !== state.date) return false;
+    if (q) {
+      const hay = ((b.title || "") + " " + (b.author || "YourDailyBook")).toLowerCase();
+      if (hay.indexOf(q) < 0) return false;
+    }
+    return true;
+  });
+}
+
+// Genre-first order: for "All", genre order (the GENRES list),
+// then newest first inside each genre; for one genre, newest
+// first. Ties on the same date fall back to title order, so the
+// order is stable and deterministic.
+function catalogSortBooks(books, genre) {
+  const out = (books || []).slice();
+  const byDateDesc = (a, b) => {
+    const da = catalogBookDate(a), db = catalogBookDate(b);
+    if (da !== db) return da < db ? 1 : -1;
+    return (a.title || "").localeCompare(b.title || "");
+  };
+  if (genre && genre !== "All") return out.sort(byDateDesc);
+  return out.sort((a, b) => {
+    const ga = GENRES.indexOf(a.genre), gb = GENRES.indexOf(b.genre);
+    if (ga !== gb) return ga - gb;
+    return byDateDesc(a, b);
+  });
+}
+
+// One page of a list: the page's books plus the counts the count
+// line and the pagination bar need. Out-of-range pages clamp to
+// the nearest real page (page 0 → 1, past the end → the last).
+function paginateBooks(list, page, perPage) {
+  const total = (list || []).length;
+  const size = Math.max(1, perPage || BROWSE_PAGE_SIZE);
+  const totalPages = Math.max(1, Math.ceil(total / size));
+  const p = Math.min(Math.max(1, page || 1), totalPages);
+  const start = (p - 1) * size;
+  return {
+    items: list.slice(start, start + size),
+    page: p,
+    totalPages: totalPages,
+    total: total,
+    start: total === 0 ? 0 : start + 1,
+    end: Math.min(total, start + size)
+  };
+}
+
+// The page tabs for the pagination bar: every number when there
+// are few pages, otherwise 1 … a window around the current page
+// … the last page.
+function paginationPages(totalPages, current) {
+  totalPages = Math.max(1, totalPages || 1);
+  current = Math.min(Math.max(1, current || 1), totalPages);
+  if (totalPages <= 7) {
+    const all = [];
+    for (let i = 1; i <= totalPages; i++) all.push(i);
+    return all;
+  }
+  const pages = [1];
+  const lo = Math.max(2, current - 1);
+  const hi = Math.min(totalPages - 1, current + 1);
+  if (lo > 2) pages.push("…");
+  for (let i = lo; i <= hi; i++) pages.push(i);
+  if (hi < totalPages - 1) pages.push("…");
+  pages.push(totalPages);
+  return pages;
+}
+
+// The browse list: filtered, then genre-first sorted.
+function browseFilteredSorted() {
+  return catalogSortBooks(catalogFilterBooks(BOOKS, browseState), browseState.genre);
+}
+
+// Genre pills for the browse view (same pill style as the daily
+// grid; its own state — changing the browse genre never touches
+// the daily tab's genre).
+function renderBrowseGenrePills() {
+  const row = $("#browseGenreRow");
+  if (!row) return;
+  const all = ["All"].concat(GENRES);
+  row.innerHTML = all.map(g =>
+    '<button type="button" class="genre-pill' + (g === browseState.genre ? " active" : "") +
+    '" data-genre="' + escapeHtml(g) + '">' + escapeHtml(g) + "</button>"
+  ).join("");
+  $$(".genre-pill", row).forEach(pill => pill.addEventListener("click", () => {
+    browseApplyState({ genre: pill.dataset.genre });
+    renderBrowseGenrePills();
+  }));
+}
+
+// The browse rating select — same age-capped options as the daily
+// rating filter (see renderRatingFilter): a visitor is only ever
+// offered PG (and PG-13 from 13), Rated R only from 18.
+function renderBrowseRatingFilter() {
+  const sel = $("#browseRating");
+  if (!sel) return;
+  const allowed = allowedRatings();
+  const opts = [["", "Show all"]].concat(allowed.map(r => [r, ratingLabel(r)]));
+  sel.innerHTML = opts.map(o => '<option value="' + o[0] + '">' + o[1] + "</option>").join("");
+  if (browseState.rating && !allowed.includes(browseState.rating)) browseState.rating = "";
+  sel.value = browseState.rating;
+}
+
+// The author dropdown, built from the authors actually present.
+function renderBrowseAuthors() {
+  const sel = $("#browseAuthor");
+  if (!sel) return;
+  sel.innerHTML = '<option value="">All authors</option>' + browseAuthors(BOOKS).map(a =>
+    '<option value="' + escapeHtml(a) + '">' + escapeHtml(a) + "</option>").join("");
+  sel.value = browseState.author || "";
+}
+
+// Render the browse view: the count line, the current page of
+// books (genre sections for "All", one grid for a single genre),
+// and the pagination bar. Cards are the same bookCardHTML as the
+// daily grid — locked books show their grey lock and the age
+// message on click, never a preview.
+function renderBrowse() {
+  const results = $("#browseResults");
+  const countEl = $("#browseCount");
+  const pager = $("#browsePagination");
+  if (!results) return;
+  const sorted = browseFilteredSorted();
+  const page = paginateBooks(sorted, browseState.page, BROWSE_PAGE_SIZE);
+  browseState.page = page.page; // keep the clamped page
+  const bits = [];
+  if (browseState.genre !== "All") bits.push(browseState.genre);
+  if (browseState.newToday) bits.push("new today");
+  if (browseState.date) bits.push("published " + browseState.date);
+  const where = bits.length ? " — " + bits.join(" · ") : "";
+  if (countEl) {
+    countEl.textContent = page.total === 0
+      ? "No books match those filters" + where + "."
+      : "Showing " + page.start + "–" + page.end + " of " + page.total +
+        " book" + (page.total === 1 ? "" : "s") + where + ".";
+  }
+  if (page.total === 0) {
+    results.innerHTML = '<div class="empty-state"><h3>No books match those filters</h3><p>Try a different genre, rating, or search.</p></div>';
+  } else if (browseState.genre === "All") {
+    let html = "";
+    GENRES.forEach(g => {
+      const inGenre = page.items.filter(b => b.genre === g);
+      if (!inGenre.length) return;
+      html += '<h3 class="browse-genre-head">' + escapeHtml(g) +
+        ' <span class="small muted">(' + inGenre.length + " on this page)</span></h3>";
+      html += '<div class="book-grid">' + inGenre.map(b => bookCardHTML(b)).join("") + "</div>";
+    });
+    results.innerHTML = html;
+  } else {
+    results.innerHTML = '<div class="book-grid">' + page.items.map(b => bookCardHTML(b)).join("") + "</div>";
+  }
+  wireBookGrid(results);
+  renderBrowsePagination(page);
+}
+
+function renderBrowsePagination(page) {
+  const pager = $("#browsePagination");
+  if (!pager) return;
+  const pages = paginationPages(page.totalPages, page.page);
+  let html = "";
+  html += '<button type="button" class="page-btn" data-page="1"' + (page.page <= 1 ? " disabled" : "") + ">First</button>";
+  html += '<button type="button" class="page-btn" data-page="' + (page.page - 1) + '"' + (page.page <= 1 ? " disabled" : "") + ">‹ Prev</button>";
+  pages.forEach(p => {
+    if (p === "…") { html += '<span class="page-ellipsis" aria-hidden="true">…</span>'; return; }
+    html += '<button type="button" class="page-btn' + (p === page.page ? " active" : "") + '" data-page="' + p + '">' + p + "</button>";
+  });
+  html += '<button type="button" class="page-btn" data-page="' + (page.page + 1) + '"' + (page.page >= page.totalPages ? " disabled" : "") + ">Next ›</button>";
+  html += '<button type="button" class="page-btn" data-page="' + page.totalPages + '"' + (page.page >= page.totalPages ? " disabled" : "") + ">Last</button>";
+  pager.innerHTML = html;
+  $$(".page-btn", pager).forEach(btn => btn.addEventListener("click", () => {
+    if (btn.disabled) return;
+    browseState.page = parseInt(btn.dataset.page, 10) || 1;
+    renderBrowse();
+    const view = $("#browseView");
+    if (view && view.scrollIntoView) view.scrollIntoView({ behavior: "smooth", block: "start" });
+  }));
+}
+
+// Apply a state change (genre, filter, or search): merge it, reset
+// to page 1, re-render. The page always resets — a filtered list
+// is shorter, and staying on page 3 of a 1-page list is a dead end.
+function browseApplyState(patch) {
+  Object.assign(browseState, patch || {});
+  browseState.page = 1;
+  renderBrowse();
+}
+
+// Reset every browse filter and the search back to the defaults.
+function resetBrowseFilters() {
+  Object.assign(browseState, {
+    genre: "All", source: "all", rating: "", author: "",
+    newToday: false, date: "", query: "", page: 1
+  });
+  const search = $("#browseSearch"); if (search) search.value = "";
+  const source = $("#browseSource"); if (source) source.value = "all";
+  const date = $("#browseDate"); if (date) date.value = "";
+  const nt = $("#browseNewToday"); if (nt) nt.checked = false;
+  renderBrowseRatingFilter();
+  renderBrowseAuthors();
+  renderBrowseGenrePills();
+  renderBrowse();
+}
+
+// Open / close the browse view (inside the Daily Books panel).
+function openBrowse() {
+  $("#dailyTodayView").classList.add("hidden");
+  $("#browseView").classList.remove("hidden");
+  renderBrowseGenrePills();
+  renderBrowse();
+  const view = $("#browseView");
+  if (view && view.scrollIntoView) view.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+function closeBrowse() {
+  $("#browseView").classList.add("hidden");
+  $("#dailyTodayView").classList.remove("hidden");
+}
+
+// Wire the browse controls (called once at init).
+function wireBrowseControls() {
+  const openBtn = $("#browseAllBtn");
+  if (openBtn) openBtn.addEventListener("click", openBrowse);
+  const backBtn = $("#browseBackBtn");
+  if (backBtn) backBtn.addEventListener("click", closeBrowse);
+  const search = $("#browseSearch");
+  if (search) search.addEventListener("input", () => browseApplyState({ query: search.value }));
+  const source = $("#browseSource");
+  if (source) source.addEventListener("change", () => browseApplyState({ source: source.value }));
+  const rating = $("#browseRating");
+  if (rating) rating.addEventListener("change", () => browseApplyState({ rating: rating.value || "" }));
+  const author = $("#browseAuthor");
+  if (author) author.addEventListener("change", () => browseApplyState({ author: author.value || "" }));
+  const nt = $("#browseNewToday");
+  if (nt) nt.addEventListener("change", () => browseApplyState({ newToday: nt.checked }));
+  const date = $("#browseDate");
+  if (date) date.addEventListener("change", () => browseApplyState({ date: date.value || "" }));
+  const reset = $("#browseResetBtn");
+  if (reset) reset.addEventListener("click", resetBrowseFilters);
 }
 
 /* ---------- Currently Reading ---------- */
@@ -1616,6 +1937,11 @@ $$("[data-plan]").forEach(btn => btn.addEventListener("click", () => {
   $$("#pfRatings input[type=checkbox]").forEach(cb => cb.addEventListener("change", () => { pfRatingsTouched = true; }));
   updateWriteModeUI(); // child/adult toggle state for Write Your Own
   renderBooks();
+  renderBrowseRatingFilter(); // age-capped rating choices for the browse view
+  renderBrowseAuthors();      // author dropdown from the authors present
+  wireBrowseControls();       // browse view entry + filters + pagination
+  renderBrowseGenrePills();   // browse genre pills (own state, not the daily genre)
+  renderBrowse();             // first render of the browse view (hidden until opened)
   renderChapterList();
   updateSleepBtn();
 })();

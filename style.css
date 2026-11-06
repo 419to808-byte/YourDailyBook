@@ -201,7 +201,7 @@ img { max-width: 100%; }
 .genre-pill.active { background: var(--accent); border-color: var(--accent); color: var(--navy); }
 .filter-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
 .filter-row label { font-size: 0.9rem; font-weight: 600; color: var(--ink-soft); }
-select, input[type="text"], input[type="email"], input[type="password"], input[type="date"], textarea {
+select, input[type="text"], input[type="email"], input[type="password"], input[type="date"], input[type="search"], textarea {
   font-family: var(--font-sans); font-size: 0.98rem; color: var(--ink);
   padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-sm);
   background: var(--surface); width: 100%;
@@ -257,6 +257,35 @@ textarea { min-height: 90px; resize: vertical; }
 .lock-icon { color: var(--ink-faint); filter: grayscale(1); font-size: 0.85rem; }
 .badge-new { background: var(--ok); color: #fff; }
 .empty-state { text-align: center; color: var(--ink-soft); padding: 48px 16px; grid-column: 1 / -1; }
+
+/* ---------------- Back-catalog browse view ---------------- */
+/* Lives inside the Daily Books panel. Same post-style cards as the
+   daily grid; the controls wrap (never scroll sideways) and the
+   pagination bar sits at the bottom. The scroll margin keeps the
+   section heading clear of the sticky header + tabs bar when the
+   view is opened (openBrowse scrolls it into view). */
+#browseView { scroll-margin-top: 150px; }
+.browse-link-row { margin: 0 0 20px; }
+.browse-controls { margin-bottom: 16px; }
+.browse-filters { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 16px; }
+.browse-field { display: flex; flex-direction: column; gap: 4px; font-size: 0.9rem; font-weight: 600; color: var(--ink-soft); min-width: 0; }
+.browse-field select, .browse-field input { width: auto; min-width: 0; }
+.browse-search { flex: 1 1 220px; }
+.browse-search input { width: 100%; }
+.browse-check { flex-direction: row; align-items: center; gap: 6px; padding-bottom: 11px; }
+.browse-check input { accent-color: var(--accent); }
+.browse-genre-head { font-size: 1.35rem; margin: 28px 0 14px; }
+.browse-genre-head:first-child { margin-top: 0; }
+.browse-pagination { display: flex; gap: 6px; align-items: center; justify-content: center; flex-wrap: wrap; margin: 28px 0 8px; }
+.page-btn {
+  font-family: var(--font-sans); font-size: 0.9rem; font-weight: 700;
+  padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink-soft); cursor: pointer;
+}
+.page-btn:hover { border-color: var(--accent); color: var(--accent-dark); }
+.page-btn.active { background: var(--accent); border-color: var(--accent); color: var(--navy); }
+.page-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.page-ellipsis { color: var(--ink-faint); padding: 0 2px; }
 
 /* ---------------- Currently Reading ---------------- */
 /* Books the user opened, most recent first. Hidden when empty.
@@ -534,6 +563,10 @@ body[data-auth-page] { padding-bottom: 24px; }
   .book-actions { flex-direction: column; align-items: stretch; }
   .book-actions .btn { width: 100%; }
   .voice-select { width: 100%; }
+  /* Browse controls wrap into two-across fields; the search takes
+     the full row. Nothing scrolls sideways. */
+  .browse-field { flex: 1 1 140px; }
+  .browse-search { flex: 1 1 100%; }
   /* Sticky player: stays a SINGLE row — cover + info + controls +
      progress inline, nothing wraps below. The tools (voice, speed,
      sleep, chapters) do not fit in the row at phone width and are
@@ -551,7 +584,7 @@ body[data-auth-page] { padding-bottom: 24px; }
   .chapter-panel { bottom: 64px; }
   /* iOS Safari auto-zooms any input under 16px on focus — keep
      every text-like input at 16px on phones. */
-  select, input[type="text"], input[type="email"], input[type="date"],
+  select, input[type="text"], input[type="email"], input[type="date"], input[type="search"],
   input[type="password"], textarea { font-size: 16px; }
   /* Reader: same view, slightly tighter. */
   .reader-cover { padding: 20px 18px; }
