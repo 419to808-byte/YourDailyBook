@@ -688,7 +688,7 @@ function bookCardHTML(book, opts) {
         <div class="book-actions">
           ${continueBtn}
           <button class="btn btn-primary btn-sm play-book" type="button" data-book-id="${book.id}">${signedIn ? "▶ Listen" : "▶ Preview"}</button>
-          <button class="btn btn-ghost btn-sm read-book" type="button" data-book-id="${book.id}">${signedIn ? "Read full story" : "Read preview"}</button>
+          <button class="btn btn-ghost btn-sm read-book" type="button" data-book-id="${book.id}">Read full story</button>
           <div class="voice-select">
             <select aria-label="Narrator voice for ${escapeHtml(book.title)}" data-book-voice="${book.id}">${voiceOptionsHTML("Warm")}</select>
           </div>
@@ -698,21 +698,40 @@ function bookCardHTML(book, opts) {
     </article>`;
 }
 
+// A visitor asking for the WHOLE story — clicking the card itself
+// or "Read full story" — goes straight to the sign-up page. The
+// teaser is what the "▶ Preview" button is for. A locked book
+// never goes anywhere: the age message instead, no reader, no
+// sign-up page. The lock is checked first, exactly like
+// openReader does.
+function goToSignupForBook(book) {
+  if (isBookLocked(book)) { showAgeLockMessage(book); return; }
+  window.location.href = "signup.html";
+}
+
 // Wire the buttons/selects inside a rendered book grid (catalog or
-// Currently Reading): clicking a card opens the reader, Listen/Read
-// open the reader/player, voice selects switch the voice, and
-// ✕ Remove takes a book out of Currently Reading only.
+// Currently Reading). For a signed-in reader, clicking a card,
+// "▶ Listen", or "Read full story" opens the reader/player. For a
+// visitor, "▶ Preview" opens the reader teaser (2 paragraphs +
+// 90s audio, then the gate), while clicking the card itself or
+// "Read full story" goes straight to the sign-up page — the whole
+// story is what sign-up is for. Voice selects switch the voice,
+// and ✕ Remove takes a book out of Currently Reading only.
 function wireBookGrid(grid) {
-  // Clicking the card itself (not a button/select) opens the reader.
+  // Clicking the card itself (not a button/select): signed-in opens
+  // the reader; a visitor goes straight to the sign-up page.
   $$(".book-card", grid).forEach(card => {
     const book = BOOKS.find(x => x.id === card.dataset.bookId);
     card.addEventListener("click", e => {
       if (e.target.closest("button, select, a")) return;
+      if (!isSignedIn()) return goToSignupForBook(book);
       openReader(book);
     });
   });
   $$(".read-book", grid).forEach(btn => btn.addEventListener("click", () => {
-    openReader(BOOKS.find(x => x.id === btn.dataset.bookId));
+    const book = BOOKS.find(x => x.id === btn.dataset.bookId);
+    if (!isSignedIn()) return goToSignupForBook(book);
+    openReader(book);
   }));
   $$(".play-book", grid).forEach(btn => btn.addEventListener("click", () => {
     const book = BOOKS.find(x => x.id === btn.dataset.bookId);

@@ -1,6 +1,6 @@
 /* ============================================================
    YourDailyBook — auth.js
-   Sign-in / sign-up page + account settings (v7, Nov 6, 2026).
+   Sign-in / sign-up page + account settings (v8, Nov 6, 2026).
    Shared by signup.html and account.html. Does NOT load app.js —
    the two pages are standalone, so this file carries its own
    small copies of the pure helpers it needs.
@@ -315,16 +315,13 @@ function wireHeader() {
    SIGN-UP PAGE (signup.html)
    ============================================================ */
 
-// The sign-up state, shared by BOTH variants — this is what makes
-// switching variants lossless: each form reads from and writes to
-// the same object.
+// The sign-up state — the one-page form reads from and writes
+// to this object.
 const signupState = {
   name: "", email: "", password: "", dob: "", plan: "listener", terms: false,
   about: "", genres: [], ratings: null, // null = defaults not yet chosen
   ratingsTouched: false,
-  voice: "Warm",
-  variant: "one", // "one" | "steps"
-  step: 1
+  voice: "Warm"
 };
 
 function signupAllowedRatings() {
@@ -358,47 +355,30 @@ function wireSignupRatings(containerId, hintId) {
   });
 }
 
-function onSignupGenreToggle(variant) {
+function onSignupGenreToggle() {
   return function (value) {
     signupState.genres = toggleGenreValue(signupState.genres, value);
     syncGenreChips($("opGenres"), signupState.genres);
-    syncGenreChips($("st2Genres"), signupState.genres);
   };
 }
 
-// Pull the visible form's values into the shared state.
+// Pull the form's values into the shared state.
 function collectSignupState() {
-  if (signupState.variant === "one") {
-    signupState.name = $("opName").value;
-    signupState.email = $("opEmail").value;
-    signupState.password = $("opPass").value;
-    signupState.dob = $("opDob").value;
-    signupState.plan = $("opPlan").value;
-    signupState.terms = $("opTerms").checked;
-    signupState.about = $("opAbout").value;
-    signupState.genres = readGenreBoxes($("opGenres"));
-    signupState.ratings = readRatingBoxes($("opRatings"));
-    signupState.voice = $("opVoice").value;
-  } else {
-    signupState.name = $("st1Name").value;
-    signupState.email = $("st1Email").value;
-    signupState.password = $("st1Pass").value;
-    signupState.dob = $("st1Dob").value;
-    signupState.plan = $("st1Plan").value;
-    signupState.about = $("st2About").value;
-    signupState.genres = readGenreBoxes($("st2Genres"));
-    signupState.ratings = readRatingBoxes($("st2Ratings"));
-    signupState.voice = $("st2Voice").value;
-    const termsBox = $("st3Terms");
-    if (termsBox) signupState.terms = termsBox.checked;
-  }
+  signupState.name = $("opName").value;
+  signupState.email = $("opEmail").value;
+  signupState.password = $("opPass").value;
+  signupState.dob = $("opDob").value;
+  signupState.plan = $("opPlan").value;
+  signupState.terms = $("opTerms").checked;
+  signupState.about = $("opAbout").value;
+  signupState.genres = readGenreBoxes($("opGenres"));
+  signupState.ratings = readRatingBoxes($("opRatings"));
+  signupState.voice = $("opVoice").value;
 }
 
-// Push the shared state into BOTH forms (so switching variants, or
-// going back a step, never loses anything typed).
-function populateSignupForms() {
+// Push the shared state into the form.
+function populateSignupForm() {
   const s = signupState;
-  // One-page form.
   $("opName").value = s.name;
   $("opEmail").value = s.email;
   $("opPass").value = s.password;
@@ -407,74 +387,8 @@ function populateSignupForms() {
   $("opTerms").checked = s.terms;
   $("opAbout").value = s.about;
   $("opVoice").value = s.voice;
-  buildGenreChips($("opGenres"), s.genres, onSignupGenreToggle("one"));
+  buildGenreChips($("opGenres"), s.genres, onSignupGenreToggle());
   wireSignupRatings("opRatings", "opRatingsHint");
-  // Step-by-step form.
-  $("st1Name").value = s.name;
-  $("st1Email").value = s.email;
-  $("st1Pass").value = s.password;
-  $("st1Dob").value = s.dob;
-  $("st1Plan").value = s.plan;
-  $("st2About").value = s.about;
-  $("st2Voice").value = s.voice;
-  buildGenreChips($("st2Genres"), s.genres, onSignupGenreToggle("steps"));
-  wireSignupRatings("st2Ratings", "st2RatingsHint");
-  const termsBox = $("st3Terms");
-  if (termsBox) termsBox.checked = s.terms;
-}
-
-function showSignupVariant(variant) {
-  collectSignupState();
-  signupState.variant = variant;
-  populateSignupForms();
-  $("onePageForm").classList.toggle("hidden", variant !== "one");
-  $("stepsForm").classList.toggle("hidden", variant !== "steps");
-  $("protoOneBtn").classList.toggle("btn-primary", variant === "one");
-  $("protoOneBtn").classList.toggle("btn-ghost", variant !== "one");
-  $("protoStepsBtn").classList.toggle("btn-primary", variant === "steps");
-  $("protoStepsBtn").classList.toggle("btn-ghost", variant !== "steps");
-  if (variant === "steps") showSignupStep(signupState.step);
-}
-
-// Step-by-step: show one step, update the progress indicator.
-function showSignupStep(n) {
-  signupState.step = n;
-  [1, 2, 3].forEach(i => {
-    const panel = $("stStep" + i);
-    if (panel) panel.classList.toggle("hidden", i !== n);
-  });
-  Array.from(document.querySelectorAll(".steps-indicator li")).forEach(li => {
-    const stepNum = parseInt(li.getAttribute("data-step"), 10);
-    li.classList.toggle("active", stepNum === n);
-    li.classList.toggle("done", stepNum < n);
-  });
-  if (n === 2) {
-    // Ratings are gated by the Step 1 birthday — re-render them
-    // from the shared state as the user arrives on Step 2.
-    wireSignupRatings("st2Ratings", "st2RatingsHint");
-  }
-  if (n === 3) renderSignupReview();
-}
-
-function renderSignupReview() {
-  const s = signupState;
-  const planLabel = s.plan === "author" ? "Author — $24.99/month" : "Listener — $9.99/month";
-  const dobText = s.dob ? s.dob : "—";
-  const ratings = (s.ratings === null ? signupDefaultRatings() : s.ratings);
-  const ratingsText = ratings.length ? ratings.map(ratingLabel).join(", ") : "Random mix (PG / PG-13)";
-  const rows = [
-    ["Your name", s.name || "—"],
-    ["Email", s.email || "—"],
-    ["Date of birth", dobText],
-    ["Plan", planLabel],
-    ["About you", s.about || "—"],
-    ["Favorite genres", s.genres.length ? s.genres.join(", ") : "Surprise me"],
-    ["Ratings", ratingsText],
-    ["Narrator voice", s.voice]
-  ];
-  $("st3Review").innerHTML = rows.map(row =>
-    '<div class="review-row"><span>' + escapeHtml(row[0]) + '</span><span>' + escapeHtml(row[1]) + "</span></div>"
-  ).join("");
 }
 
 function validateAccountStep(errEl) {
@@ -487,8 +401,8 @@ function validateAccountStep(errEl) {
   return true;
 }
 
-// Finish sign-up (either variant): save the account + the weekly
-// book details, then show the success view.
+// Finish sign-up: save the account + the weekly book details,
+// then show the success view.
 function completeSignup() {
   const s = signupState;
   const ratings = (s.ratings === null ? signupDefaultRatings() : s.ratings);
@@ -517,9 +431,7 @@ function showAuthMode(mode) {
   $("modeSignupBtn").classList.toggle("active", isSignup);
   $("modeLoginBtn").classList.toggle("active", !isSignup);
   $("authTitle").textContent = isSignup ? "Create your account" : "Welcome back";
-  $("protoSwitcher").classList.toggle("hidden", !isSignup);
-  $("onePageForm").classList.toggle("hidden", !isSignup || signupState.variant !== "one");
-  $("stepsForm").classList.toggle("hidden", !isSignup || signupState.variant !== "steps");
+  $("onePageForm").classList.toggle("hidden", !isSignup);
   $("loginFormPage").classList.toggle("hidden", isSignup);
 }
 
@@ -555,42 +467,22 @@ function initSignupPage() {
   const planParam = params.get("plan");
   if (planParam === "author" || planParam === "listener") signupState.plan = planParam;
 
-  // Fill the voice selects.
+  // Fill the voice select.
   $("opVoice").innerHTML = voiceOptionsHTML("Warm");
-  $("st2Voice").innerHTML = voiceOptionsHTML("Warm");
-  populateSignupForms();
+  populateSignupForm();
 
   // Mode toggle.
   $("modeSignupBtn").addEventListener("click", () => showAuthMode("signup"));
   $("modeLoginBtn").addEventListener("click", () => showAuthMode("login"));
   $("switchToSignup").addEventListener("click", () => showAuthMode("signup"));
 
-  // Prototype switcher — both flows, one page, nothing typed lost.
-  $("protoOneBtn").addEventListener("click", () => showSignupVariant("one"));
-  $("protoStepsBtn").addEventListener("click", () => showSignupVariant("steps"));
-
-  // DOB typed on the one-page form re-gates the ratings live.
+  // DOB typed on the form re-gates the ratings live.
   $("opDob").addEventListener("change", () => {
     collectSignupState();
     if (!signupState.ratingsTouched) signupState.ratings = null;
     else signupState.ratings = (signupState.ratings || []).filter(r => signupAllowedRatings().indexOf(r) >= 0);
     wireSignupRatings("opRatings", "opRatingsHint");
   });
-  // DOB typed on Step 1 re-gates the Step 2 ratings.
-  $("st1Dob").addEventListener("change", () => {
-    collectSignupState();
-    if (!signupState.ratingsTouched) signupState.ratings = null;
-    else signupState.ratings = (signupState.ratings || []).filter(r => signupAllowedRatings().indexOf(r) >= 0);
-  });
-
-  // Step-by-step navigation.
-  $("stNext1").addEventListener("click", () => {
-    collectSignupState();
-    if (validateAccountStep($("stStep1Error"))) showSignupStep(2);
-  });
-  $("stBack2").addEventListener("click", () => { collectSignupState(); showSignupStep(1); });
-  $("stNext2").addEventListener("click", () => { collectSignupState(); showSignupStep(3); });
-  $("stBack3").addEventListener("click", () => { collectSignupState(); showSignupStep(2); });
 
   // One-page submit.
   $("onePageForm").addEventListener("submit", e => {
@@ -599,16 +491,6 @@ function initSignupPage() {
     if (!validateAccountStep($("opError"))) return;
     if (!signupState.terms) { showError($("opError"), "Please agree to the Terms of Service."); return; }
     clearError($("opError"));
-    completeSignup();
-  });
-
-  // Step-by-step submit (from the review step).
-  $("stepsForm").addEventListener("submit", e => {
-    e.preventDefault();
-    collectSignupState();
-    if (!validateAccountStep($("stStep3Error"))) return;
-    if (!signupState.terms) { showError($("stStep3Error"), "Please agree to the Terms of Service."); return; }
-    clearError($("stStep3Error"));
     completeSignup();
   });
 

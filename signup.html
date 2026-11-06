@@ -62,17 +62,7 @@
       <button type="button" class="auth-toggle-btn" id="modeLoginBtn" role="tab" aria-selected="false">Log in</button>
     </div>
 
-    <!-- Prototype switcher — sign-up flow only. One will be picked for launch. -->
-    <div class="card proto-switcher" id="protoSwitcher">
-      <p class="small" style="margin:0;"><strong>Prototype — try both signup flows, one will be picked for launch:</strong></p>
-      <div class="proto-btns">
-        <button type="button" class="btn btn-primary btn-sm" id="protoOneBtn">One page</button>
-        <button type="button" class="btn btn-ghost btn-sm" id="protoStepsBtn">Step by step</button>
-      </div>
-      <p class="small muted" style="margin:0;">Switching keeps everything you've typed.</p>
-    </div>
-
-    <!-- ============ VARIANT 1: ONE PAGE (default) ============ -->
+    <!-- ============ SIGN UP: ONE PAGE ============ -->
     <form id="onePageForm" class="card auth-form" novalidate>
       <h3>Your account</h3>
       <div class="form-field">
@@ -134,97 +124,6 @@
       <p class="form-error hidden" id="opError" role="alert"></p>
       <button class="btn btn-primary btn-block" type="submit">Create Account</button>
       <p class="fine-print mt-2">By signing up you agree to the Terms of Service and Privacy Policy. Cancel anytime from your account page.</p>
-    </form>
-
-    <!-- ============ VARIANT 2: STEP BY STEP ============ -->
-    <form id="stepsForm" class="card auth-form hidden" novalidate>
-      <ol class="steps-indicator">
-        <li data-step="1" class="active"><span class="step-num">1</span> Your account</li>
-        <li data-step="2"><span class="step-num">2</span> Your weekly book</li>
-        <li data-step="3"><span class="step-num">3</span> Review &amp; create</li>
-      </ol>
-
-      <!-- Step 1: Your account -->
-      <div id="stStep1">
-        <h3>Your account</h3>
-        <div class="form-field">
-          <label for="st1Plan">Plan</label>
-          <select id="st1Plan">
-            <option value="listener">Listener — $9.99/month</option>
-            <option value="author">Author — $24.99/month</option>
-          </select>
-        </div>
-        <div class="form-field">
-          <label for="st1Name">Your name</label>
-          <input type="text" id="st1Name" placeholder="Your name" required autocomplete="name">
-        </div>
-        <div class="form-field">
-          <label for="st1Email">Email</label>
-          <input type="email" id="st1Email" placeholder="you@example.com" required autocomplete="email">
-        </div>
-        <div class="form-field">
-          <label for="st1Pass">Password</label>
-          <input type="password" id="st1Pass" placeholder="At least 8 characters" required minlength="8" autocomplete="new-password">
-        </div>
-        <div class="form-field">
-          <label for="st1Dob">Date of birth</label>
-          <input type="date" id="st1Dob" required autocomplete="bday">
-          <div class="hint">Your date of birth sets your content mode — under 18 gets child-safe content only. A parent or guardian manages payment for accounts under 18.</div>
-        </div>
-        <p class="form-error hidden" id="stStep1Error" role="alert"></p>
-        <button class="btn btn-primary btn-block" id="stNext1" type="button">Next: Your weekly book →</button>
-      </div>
-
-      <!-- Step 2: Your weekly book -->
-      <div id="stStep2" class="hidden">
-        <h3>Your weekly book</h3>
-        <p class="muted small">Once a week, a short story is written just for you — built from these details. It's your story, about you, in the genres and content ratings you choose.</p>
-        <div class="form-field">
-          <label for="st2About">A short description of yourself</label>
-          <textarea id="st2About" placeholder="A few sentences — what you love, where you're from, what kind of hero you want to be…"></textarea>
-          <div class="hint">This is what the story is built from. Keep it as short or as detailed as you like.</div>
-        </div>
-        <div class="form-field">
-          <label>Favorite genres <span class="hint">(pick up to 3)</span></label>
-          <div class="check-row" id="st2Genres"></div>
-        </div>
-        <div class="form-field">
-          <label>Ratings for your weekly book <span class="hint">(pick any that fit you)</span></label>
-          <div class="check-row" id="st2Ratings"></div>
-          <div class="hint" id="st2RatingsHint"></div>
-        </div>
-        <div class="form-field">
-          <label for="st2Voice">Your narrator voice</label>
-          <select id="st2Voice"></select>
-          <div class="hint">You can switch voices anytime — even mid-sentence — without losing your place.</div>
-        </div>
-        <div class="step-nav">
-          <button class="btn btn-ghost" id="stBack2" type="button">← Back</button>
-          <button class="btn btn-primary" id="stNext2" type="button">Next: Review →</button>
-        </div>
-      </div>
-
-      <!-- Step 3: Review & create -->
-      <div id="stStep3" class="hidden">
-        <h3>Review &amp; create</h3>
-        <p class="muted small">Check everything below. You can go back and change any of it — and you can change these details anytime later in Settings.</p>
-        <div class="review-list" id="st3Review"></div>
-        <div class="form-field mt-2">
-          <label style="display:flex; gap:8px; align-items:flex-start; font-weight:400;">
-            <input type="checkbox" id="st3Terms" style="width:auto; margin-top:4px;" required>
-            <span>I've read the <a href="policies.html" target="_blank">Policies</a> and agree to the Terms of Service. (For accounts under 18, a parent or guardian agrees.)</span>
-          </label>
-        </div>
-        <div class="callout mb-2">
-          <p><strong>About the upfront fee.</strong> When you sign up, we immediately do the pre-render work — caching the tone, tempo, and emotion directions and rendering the launch catalog in the narrator voices. That work happens the moment signup completes, so the one-time upfront fee ($[amount], to be set) is <strong>non-refundable once signup is complete</strong>. Payment is handled securely by Stripe — we never see or store your card number.</p>
-        </div>
-        <p class="form-error hidden" id="stStep3Error" role="alert"></p>
-        <div class="step-nav">
-          <button class="btn btn-ghost" id="stBack3" type="button">← Back</button>
-          <button class="btn btn-primary" type="submit">Create Account</button>
-        </div>
-        <p class="fine-print mt-2">By signing up you agree to the Terms of Service and Privacy Policy. Cancel anytime from your account page.</p>
-      </div>
     </form>
 
     <!-- ============ LOG IN ============ -->
