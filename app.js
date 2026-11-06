@@ -115,6 +115,64 @@ const REVISION_QUESTIONS = [
   ["Anything else", "Anything else you'd change about this chapter? Say it in your own words."]
 ];
 
+/* ---------- Book preview / full text (PLACEHOLDER) ---------- */
+/* A visitor sees only the PREVIEW: the first 2 paragraphs — about
+   half a page, enough to hook, ending before the story gets going.
+   A signed-in user sees the FULL text: preview + 5 more paragraphs.
+   Real generated book text replaces all of this at launch. */
+
+const PREVIEW_AUDIO_SECS = 90; // a visitor hears only the opening (~90s of narration)
+
+// Genre-flavored opening paragraph for each book's preview (shared
+// across the genre; the second paragraph is built from the book's
+// own description, so every book's preview reads differently).
+const GENRE_OPENERS = {
+  "Romance": "The lighthouse had been dark for twenty years, and the whole town had agreed to stop talking about why. Mara told herself she was only back to sell the house — she did not tell herself she was back for the man who used to light it. But the first thing she saw from the ferry was the light, burning again, and the second thing she saw was him, standing on the dock like he had never left.",
+  "Mystery": "Every clock in the village stopped at 11:47, and nobody could say why. The constable wrote it down anyway, because 11:47 was the exact minute they found the mayor, and the clockmaker was the only man in town who knew how to stop them all. The clockmaker swore he was home all evening — but the clocks, every one of them, said otherwise.",
+  "Thriller": "The passenger knew her name before she introduced herself, and she had never given it to the app. 'Drive,' the voice said from the back seat, 'and don't look at your phone.' She drove. And with every mile, the voice told her one more thing it should not have been able to know.",
+  "Fantasy": "The mapmaker found the coastline on a Tuesday, drawn in ink that had not been there the day before. It showed a shore her guild had never charted, and a kingdom that only existed on maps drawn in starlight. She traced the line with one finger and felt it move — as if the map were still being drawn, and as if it were drawing her.",
+  "Science Fiction": "The listening post had been silent for eleven years, and then, at 03:14, it picked up a signal from a dead moon. The signal was broadcasting the crew's own voices — three days in the future. The crew did what the manual said never to do: they answered back.",
+  "Horror": "The house was the cheapest in the county, and the listing did not say why. By the second night, the new owner understood: the house had opinions about being flipped. The third night, the house made its opinion known — in the walls, in a voice she recognized as her own.",
+  "Historical Fiction": "In occupied Paris, the seamstress hid her messages where no soldier would ever look — in the hems of dresses. Then a German officer ordered a gown for his wife, and the hem she had just finished was the one that mattered most. She had one night to decide: finish the dress, and the message with it — or cut the hem out, and lose the only proof that the network was still alive.",
+  "Crime": "The informant had one tip left, and it was the kind that could buy him a new life or get him killed before sunrise. The detective on the other end of the phone was the one person he could not trust — and the only one who would answer. He gave the tip anyway, because the alternative was worse: staying exactly where he was.",
+  "Adventure": "The map should not have existed, and the desert it pointed to was not on any satellite. The disgraced archaeologist followed it anyway, because the map was drawn in her grandmother's hand. She packed light, told no one, and crossed the border at dawn — with a teenage cartographer who claimed she could read what the map was hiding.",
+  "Contemporary Fiction": "She had not read a book since her husband died, and then she inherited a bookshop. The regulars refused to let her sell it, and the first customer through the door asked for the one book she could never find. She looked anyway — because the shop, and the people in it, were not going to let her stop looking."
+};
+
+const PREVIEW_HOOKS = [
+  "By the end of the first chapter, the choice is already made — and there is no going back.",
+  "What happens next is the reason the whole town is still talking about it.",
+  "The first page is only the beginning of what the story is really about.",
+  "Nobody in the story sees it coming. You will.",
+  "The opening is quiet. The second chapter is not."
+];
+
+// The rest of the placeholder "full" text: preview + these 5 paragraphs.
+const FULL_CONTINUATION = [
+  book => "Chapter Two begins where the first one leaves off — with the hero of " + book.title + " standing at the edge of a decision that will shape everything after it. The morning is ordinary. The choice is not.",
+  "The chapters that follow widen the world: new faces, old debts, and a thread that pulls tighter with every page. Nothing here is wasted — every scene is a door, and every door opens onto another.",
+  "Halfway through, the story turns. What looked like the problem was only the shape of it; the real problem has been standing in plain sight since the first chapter, waiting to be named.",
+  "The final chapters bring the threads together — the promise made in the opening, the debt incurred in the middle, and the price that has to be paid before the end. Not every thread is tied. Some are cut.",
+  "The last page lands quietly, the way the best endings do: not with a shout, but with a door closing behind you — and the sense that the story is still going on somewhere, just out of sight."
+];
+
+function bookPreviewText(book) {
+  const opener = GENRE_OPENERS[book.genre] || GENRE_OPENERS["Contemporary Fiction"];
+  const hook = PREVIEW_HOOKS[BOOKS.indexOf(book) % PREVIEW_HOOKS.length];
+  return [opener, book.desc + " " + hook];
+}
+
+function bookFullText(book) {
+  const extra = FULL_CONTINUATION.map(p => typeof p === "function" ? p(book) : p);
+  return bookPreviewText(book).concat(extra);
+}
+
+// How far a visitor may play. Signed-in users have no limit.
+function previewLimitSecs() { return isSignedIn() ? Infinity : PREVIEW_AUDIO_SECS; }
+
+// Chapters past the preview (chapter 1) are locked for visitors.
+function chapterLocked(idx) { return !isSignedIn() && idx > 0; }
+
 /* ---------- Helpers ---------- */
 
 const $ = (sel, root) => (root || document).querySelector(sel);
@@ -133,6 +191,194 @@ function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, c => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
   }[c]));
+}
+
+/* ---------- Simulated sign-in state ---------- */
+/* DEMO ONLY: no backend, no real accounts. The state lives in a
+   variable + localStorage so the preview gate and the age modes can
+   be tested (visitor / child / adult). Real auth + Stripe replace
+   this at launch. The account's age comes from the date of birth
+   given at sign-up; visitors (not signed in) are child-safe by
+   default, since age cannot be verified. */
+
+const AUTH_KEY = "ydb-auth";
+let auth = { signedIn: false, name: "", dob: null, isAdult: false, writeMode: "child" };
+try {
+  const saved = JSON.parse(localStorage.getItem(AUTH_KEY) || "null");
+  if (saved && saved.signedIn) {
+    auth = Object.assign({ signedIn: false, name: "", dob: null, isAdult: false, writeMode: "child" }, saved);
+  }
+} catch (e) { /* corrupted saved state — stay signed out */ }
+
+function isSignedIn() { return auth.signedIn === true; }
+
+// An adult is a signed-in user whose account age is 18+. Visitors
+// and child accounts are child-safe.
+function isAdultUser() { return isSignedIn() && auth.isAdult === true; }
+
+// Highest spice level this user may see in the catalog.
+function maxSpiceAllowed() { return isAdultUser() ? 4 : 2; }
+
+function ageFromDob(dobStr) {
+  if (!dobStr) return null;
+  const dob = new Date(dobStr);
+  if (isNaN(dob.getTime())) return null;
+  return (Date.now() - dob.getTime()) / (365.25 * 24 * 3600 * 1000);
+}
+
+function persistAuth() {
+  try { localStorage.setItem(AUTH_KEY, JSON.stringify(auth)); } catch (e) { /* storage unavailable — session-only */ }
+}
+
+function signIn(name, dob) {
+  // dob is an ISO date string from the sign-up form. Log-in (demo)
+  // has no DOB on file — treated as adult; real auth carries the
+  // account's stored date of birth.
+  const age = ageFromDob(dob);
+  const isAdult = age === null ? true : age >= 18;
+  auth = {
+    signedIn: true,
+    name: (name || "Reader").trim() || "Reader",
+    dob: dob || null,
+    isAdult: isAdult,
+    writeMode: isAdult ? "adult" : "child"
+  };
+  persistAuth();
+  updateAuthUI();
+  updateWriteModeUI();
+  renderSpiceFilter();
+  renderPfSpice();
+  if (readerBook) renderReader();
+  renderChapterList();
+  renderBooks();
+}
+
+function signOut() {
+  auth = { signedIn: false, name: "", dob: null, isAdult: false, writeMode: "child" };
+  try { localStorage.removeItem(AUTH_KEY); } catch (e) { /* ignore */ }
+  // If the player was past the visitor preview limit, pull it back.
+  if (player.current && player.position > PREVIEW_AUDIO_SECS) {
+    player.position = PREVIEW_AUDIO_SECS;
+    setPlaying(false);
+  }
+  updateAuthUI();
+  updateWriteModeUI();
+  renderSpiceFilter();
+  renderPfSpice();
+  if (readerBook) renderReader();
+  renderChapterList();
+  renderBooks();
+}
+
+function updateAuthUI() {
+  const signedIn = isSignedIn();
+  $("#loginBtn").classList.toggle("hidden", signedIn);
+  $("#signupBtn").classList.toggle("hidden", signedIn);
+  $("#signoutBtn").classList.toggle("hidden", !signedIn);
+  const greet = $("#authGreeting");
+  greet.classList.toggle("hidden", !signedIn);
+  if (signedIn) greet.textContent = "Hi, " + auth.name;
+}
+
+/* ---------- Child / adult mode (Write Your Own) ---------- */
+/* The toggle is tied to the account age (date of birth at sign-up).
+   - Visitor (not signed in): child mode, locked — age can't be verified.
+   - Child account (under 18): child mode, locked — cannot switch to adult.
+   - Adult account: starts in adult mode, can switch to child freely
+     (e.g., making a book for a child) and back.
+   Child mode generates age-appropriate books only (no sexual content,
+   no adult themes). Adult mode is unchained. The minors hard stop —
+   no sexual content involving minors, ever — applies in BOTH modes. */
+
+function writeMode() { return auth.writeMode || "child"; }
+function canSwitchWriteMode() { return isAdultUser(); }
+
+function setWriteMode(mode) {
+  if (mode === "adult" && !canSwitchWriteMode()) return false;
+  auth.writeMode = mode;
+  persistAuth();
+  updateWriteModeUI();
+  return true;
+}
+
+function updateWriteModeUI() {
+  const mode = writeMode();
+  const locked = !canSwitchWriteMode();
+  const childBtn = $("#modeChildBtn");
+  const adultBtn = $("#modeAdultBtn");
+  childBtn.classList.toggle("active", mode === "child");
+  adultBtn.classList.toggle("active", mode === "adult");
+  adultBtn.disabled = locked;
+  const badge = $("#writeModeBadge");
+  badge.textContent = mode === "child" ? "Child mode" : "Adult mode";
+  badge.className = "badge " + (mode === "child" ? "badge-child" : "badge-adult");
+  $("#writeModeDesc").textContent = mode === "child"
+    ? "Child mode — the AI writes age-appropriate books only: no sexual content, no adult themes. The questions and guidance are written for young writers."
+    : "Adult mode — unchained: no holds, no blocks, no spice cap. The writer has full creative freedom.";
+  $("#writeModeLock").textContent = !isSignedIn()
+    ? "You're browsing as a visitor, so Child mode is on — we can't verify age without an account. Sign in with an adult account to switch to Adult mode."
+    : (!isAdultUser()
+      ? "This account is under 18, so Child mode is locked on. It can't be switched to Adult mode."
+      : "You can switch modes anytime — use Child mode when making a book for a child.");
+  $("#writeFlowMode").textContent = mode === "child"
+    ? "Mode: Child — age-appropriate. Your book will contain no sexual content and no adult themes."
+    : "Mode: Adult — unchained. No holds, no blocks, no spice cap. (No sexual content involving minors, ever.)";
+  $("#wfStep1Note").textContent = mode === "child"
+    ? "Child mode: your book will be age-appropriate — no sexual content, no adult themes."
+    : "Adult mode: unchained — no holds, no blocks, no spice cap. (The one hard rule still applies: no sexual content involving minors, ever.)";
+  $("#wfRevisionModeNote").textContent = mode === "child"
+    ? "In Child mode, every revision stays age-appropriate too."
+    : "In Adult mode, revisions are unchained — the same freedom as the first draft. (No sexual content involving minors, ever.)";
+}
+
+// The 15 revision questions, framed for the current mode. In child
+// mode the romance/chemistry question becomes a friendship question;
+// the other 14 are already age-neutral.
+function revisionQuestionsForMode() {
+  if (writeMode() === "child") {
+    return REVISION_QUESTIONS.map(q =>
+      q[0] === "Romance / chemistry"
+        ? ["Friendship", "Do the friendships feel real and kind? Is anyone left out or treated unkindly?"]
+        : q
+    );
+  }
+  return REVISION_QUESTIONS;
+}
+
+/* ---------- Age-based catalog filtering ---------- */
+/* The spice filter doubles as the age filter. A child account or a
+   visitor only ever sees spice 1–2; spice 3–4 are hidden from the
+   grid and are not offered as filter choices. An adult account sees
+   the full catalog. */
+
+function renderSpiceFilter() {
+  const sel = $("#spiceFilter");
+  const adult = isAdultUser();
+  const opts = [[0, "Show all"], [1, "1 — Sweet"], [2, "2 — Mild"]];
+  if (adult) opts.push([3, "3 — Steamy"], [4, "4 — Open-door"]);
+  sel.innerHTML = opts.map(o => '<option value="' + o[0] + '">' + o[1] + "</option>").join("");
+  if (maxSpice > maxSpiceAllowed()) maxSpice = 0;
+  sel.value = String(maxSpice);
+}
+
+function renderPfSpice() {
+  const sel = $("#pfSpice");
+  const adult = isAdultUser();
+  const prev = sel.value;
+  const opts = [[1, "1 — Sweet"], [2, "2 — Mild"]];
+  if (adult) opts.push([3, "3 — Steamy"], [4, "4 — Open-door"]);
+  sel.innerHTML = opts.map(o => '<option value="' + o[0] + '">' + o[1] + "</option>").join("");
+  sel.value = (prev === "3" || prev === "4") ? (adult ? prev : "2") : (prev || "2");
+  const hint = $("#pfSpiceHint");
+  if (hint) hint.textContent = adult ? "" : "Child-safe accounts only see spice 1–2.";
+}
+
+function updateCatalogNote() {
+  const note = $("#catalogAgeNote");
+  if (!note) return;
+  note.textContent = isAdultUser()
+    ? "Showing the full catalog, including steamy books (spice 3–4)."
+    : "Showing age-appropriate books (spice 1–2). Sign in with an adult account to see the full catalog, including steamy books.";
 }
 
 /* ---------- Tabs ---------- */
@@ -202,8 +448,10 @@ function renderGenrePills() {
 }
 
 function filteredBooks() {
+  const cap = maxSpiceAllowed();
   return BOOKS.filter(b =>
     (activeGenre === "All" || b.genre === activeGenre) &&
+    b.spice <= cap &&
     (maxSpice === 0 || b.spice <= maxSpice)
   );
 }
@@ -211,12 +459,16 @@ function filteredBooks() {
 function renderBooks() {
   const grid = $("#bookGrid");
   const list = filteredBooks();
+  updateCatalogNote();
   $("#bookCount").textContent = list.length + " book" + (list.length === 1 ? "" : "s") + " · New today";
   if (list.length === 0) {
     grid.innerHTML = '<div class="empty-state"><h3>No books match that filter</h3><p>Try a different genre or spice level.</p></div>';
     return;
   }
-  grid.innerHTML = list.map(b => `
+  grid.innerHTML = list.map(b => {
+    const preview = bookPreviewText(b)[0];
+    const signedIn = isSignedIn();
+    return `
     <article class="book-card" data-book-id="${b.id}">
       <div class="book-cover ${b.grad}">
         <div class="cover-top">
@@ -227,6 +479,8 @@ function renderBooks() {
       </div>
       <div class="book-body">
         <p class="book-desc">${escapeHtml(b.desc)}</p>
+        <p class="preview-label">Preview — the first pages</p>
+        <p class="preview-snippet">${escapeHtml(preview)}</p>
         <div class="book-meta">
           <span>⏱ ${b.dur}</span>
           <span>📖 13 chapters</span>
@@ -234,17 +488,31 @@ function renderBooks() {
           <span class="badge badge-new">New today</span>
         </div>
         <div class="book-actions">
-          <button class="btn btn-primary btn-sm play-book" type="button" data-book-id="${b.id}">▶ Play</button>
+          <button class="btn btn-primary btn-sm play-book" type="button" data-book-id="${b.id}">${signedIn ? "▶ Listen" : "▶ Preview"}</button>
+          <button class="btn btn-ghost btn-sm read-book" type="button" data-book-id="${b.id}">${signedIn ? "Read full story" : "Read preview"}</button>
           <div class="voice-select">
             <select aria-label="Narrator voice for ${escapeHtml(b.title)}" data-book-voice="${b.id}">${voiceOptionsHTML("Warm")}</select>
           </div>
         </div>
       </div>
-    </article>`).join("");
+    </article>`;
+  }).join("");
 
+  // Clicking the card itself (not a button/select) opens the reader.
+  $$(".book-card", grid).forEach(card => {
+    const book = BOOKS.find(x => x.id === card.dataset.bookId);
+    card.addEventListener("click", e => {
+      if (e.target.closest("button, select, a")) return;
+      openReader(book);
+    });
+  });
+  $$(".read-book", grid).forEach(btn => btn.addEventListener("click", () => {
+    openReader(BOOKS.find(x => x.id === btn.dataset.bookId));
+  }));
   $$(".play-book", grid).forEach(btn => btn.addEventListener("click", () => {
     const book = BOOKS.find(x => x.id === btn.dataset.bookId);
     const voiceSel = grid.querySelector('[data-book-voice="' + book.id + '"]');
+    openReader(book);
     loadBook(book, voiceSel ? voiceSel.value : "Warm", true);
   }));
   $$("[data-book-voice]", grid).forEach(sel => sel.addEventListener("change", () => {
@@ -315,12 +583,26 @@ function loadBook(book, voice, autoplay) {
   if (autoplay) setPlaying(true);
 }
 
+// A visitor hit the end of the audio preview: stop and open the gate.
+function previewGateReached() {
+  if (player.current) {
+    openSignup("You reached the end of the preview of “" + player.current.title + "”. Sign up to hear the rest — and every book, every day.");
+  } else {
+    openSignup();
+  }
+}
+
 function updatePlayerSub() {
   if (!player.current) return;
+  if (!isSignedIn() && player.position >= PREVIEW_AUDIO_SECS) {
+    $("#playerSub").textContent = "Preview ended — sign up to keep listening";
+    return;
+  }
   const ch = currentChapterIndex() + 1;
   $("#playerSub").textContent =
     player.current.genre + " · Chapter " + ch + " of " + CHAPTER_COUNT +
-    " · Narrated by " + player.voice + " · Spice " + player.current.spice;
+    " · Narrated by " + player.voice + " · Spice " + player.current.spice +
+    (isSignedIn() ? "" : " · Preview");
 }
 
 function setVoice(name) {
@@ -331,6 +613,12 @@ function setVoice(name) {
 }
 
 function setPlaying(playing) {
+  // A visitor who already reached the end of the preview cannot
+  // resume past it — the gate opens instead.
+  if (playing && player.current && !isSignedIn() && player.position >= PREVIEW_AUDIO_SECS) {
+    previewGateReached();
+    return;
+  }
   player.playing = playing;
   $("#playPauseBtn").textContent = playing ? "⏸" : "▶";
   $("#playPauseBtn").setAttribute("aria-label", playing ? "Pause" : "Play");
@@ -349,6 +637,13 @@ function setPlaying(playing) {
 function tick() {
   if (!player.playing || !player.current) return;
   player.position += 0.25 * player.speed;
+  // Visitor audio preview: stop at the preview limit and open the gate.
+  if (player.position >= previewLimitSecs()) {
+    player.position = previewLimitSecs();
+    setPlaying(false);
+    if (!isSignedIn()) previewGateReached();
+    return;
+  }
   if (player.sleepMins > 0 && Date.now() >= player.sleepEndsAt) {
     player.sleepMins = 0;
     updateSleepBtn();
@@ -410,13 +705,19 @@ function renderChapterList() {
   const cur = currentChapterIndex();
   $("#chapterPanelTitle").textContent = player.current.title;
   $("#chapterPanelSub").textContent = player.current.genre + " · " + CHAPTER_COUNT + " chapters · " + player.current.dur;
-  list.innerHTML = durs.map((d, i) =>
-    '<li><button type="button" data-chapter="' + i + '" class="' + (i === cur ? "current" : "") + '">' +
-    "<span>Chapter " + (i + 1) + (i === cur ? " — now playing" : "") + "</span>" +
-    "<span>" + fmtTime(d) + "</span></button></li>"
-  ).join("");
+  list.innerHTML = durs.map((d, i) => {
+    const locked = chapterLocked(i);
+    return '<li><button type="button" data-chapter="' + i + '" class="' + (i === cur ? "current" : "") + (locked ? " locked" : "") + '">' +
+    "<span>" + (locked ? "🔒 " : "") + "Chapter " + (i + 1) + (i === cur ? " — now playing" : "") + (locked ? " — sign up to listen" : "") + "</span>" +
+    "<span>" + fmtTime(d) + "</span></button></li>";
+  }).join("");
   $$("[data-chapter]", list).forEach(btn => btn.addEventListener("click", () => {
-    player.position = chapterStartSeconds(parseInt(btn.dataset.chapter, 10));
+    const idx = parseInt(btn.dataset.chapter, 10);
+    if (chapterLocked(idx)) {
+      openSignup("Chapter " + (idx + 1) + " is past the preview. Sign up to listen to the full story.");
+      return;
+    }
+    player.position = chapterStartSeconds(idx);
     updatePlayerUI();
     renderChapterList();
   }));
@@ -454,13 +755,22 @@ $("#progressTrack").addEventListener("click", e => {
   if (!player.current) return;
   const rect = e.currentTarget.getBoundingClientRect();
   const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
-  player.position = ratio * player.current.secs;
+  const target = ratio * player.current.secs;
+  if (target > previewLimitSecs()) {
+    // A visitor tried to seek past the preview — open the gate.
+    openSignup("That part of the book is past the preview. Sign up to listen to the full story.");
+    return;
+  }
+  player.position = target;
   updatePlayerUI();
 });
 $("#progressTrack").addEventListener("keydown", e => {
   if (!player.current) return;
   if (e.key === "ArrowLeft") { player.position = Math.max(0, player.position - 10); updatePlayerUI(); }
-  if (e.key === "ArrowRight") { player.position = Math.min(player.current.secs, player.position + 10); updatePlayerUI(); }
+  if (e.key === "ArrowRight") {
+    player.position = Math.min(player.current.secs, player.position + 10, previewLimitSecs());
+    updatePlayerUI();
+  }
 });
 document.addEventListener("click", e => {
   const panel = $("#chapterPanel");
@@ -471,6 +781,104 @@ document.addEventListener("click", e => {
 });
 // Sleep timer countdown display refresh
 setInterval(() => { if (player.sleepMins > 0) updateSleepBtn(); }, 15000);
+
+/* ---------- Book reader view ---------- */
+/* Two states, per the locked design decision (TY Nov 5 ~9:55 PM):
+   - Visitor: preview text only (first 2 paragraphs, ~half a page),
+     then the sign-up gate. "Read/listen to the full story" opens
+     the sign-up modal.
+   - Signed-in user: the full story text + full audio playback. */
+
+let readerBook = null;
+
+function openReader(book) {
+  readerBook = book;
+  document.body.classList.add("reading");
+  $("#bookView").classList.remove("hidden");
+  renderReader();
+  window.scrollTo(0, 0);
+}
+
+function closeReader() {
+  readerBook = null;
+  document.body.classList.remove("reading");
+  $("#bookView").classList.add("hidden");
+}
+
+$("#readerBackBtn").addEventListener("click", closeReader);
+
+function renderReader() {
+  const wrap = $("#readerContent");
+  const book = readerBook;
+  if (!book) { wrap.innerHTML = ""; return; }
+  const voice = player.current && player.current.id === book.id ? player.voice : "Warm";
+  const coverHTML = `
+      <div class="reader-cover ${book.grad}">
+        <span class="cover-genre">${escapeHtml(book.genre)} · New today</span>
+        <div class="cover-title">${escapeHtml(book.title)}</div>
+        <div class="cover-meta">${book.dur} · ${CHAPTER_COUNT} chapters · Spice ${book.spice}</div>
+      </div>`;
+  const headHTML = `
+      <div class="reader-head">
+        <h2>${escapeHtml(book.title)}</h2>
+        <p class="muted">${escapeHtml(book.genre)} · ${book.dur} · 13 chapters · <span class="badge badge-spice">Spice ${book.spice}</span> <span class="badge badge-ai-dark">AI-Generated</span> <span class="badge badge-new">New today</span></p>
+      </div>`;
+  const voiceHTML = `
+        <label class="reader-voice">Narrator
+          <select id="readerVoiceSelect" aria-label="Narrator voice">${voiceOptionsHTML(voice)}</select>
+        </label>`;
+
+  if (isSignedIn()) {
+    const paras = bookFullText(book);
+    wrap.innerHTML = `
+    <article class="reader">
+      ${coverHTML}
+      ${headHTML}
+      <div class="reader-actions">
+        <button class="btn btn-primary" id="readerListenBtn" type="button">▶ Listen to the Full Story</button>
+        ${voiceHTML}
+      </div>
+      <div class="reader-text">${paras.map(p => "<p>" + escapeHtml(p) + "</p>").join("")}</div>
+      <p class="small muted">(Placeholder text — the real generated book replaces this at launch.)</p>
+    </article>`;
+    $("#readerListenBtn").addEventListener("click", () => {
+      loadBook(book, $("#readerVoiceSelect").value, true);
+      document.getElementById("player").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+    $("#readerVoiceSelect").addEventListener("change", e => setVoice(e.target.value));
+  } else {
+    const paras = bookPreviewText(book);
+    wrap.innerHTML = `
+    <article class="reader">
+      ${coverHTML}
+      ${headHTML}
+      <div class="reader-actions">
+        <button class="btn btn-primary" id="readerListenPreviewBtn" type="button">▶ Listen to the Preview</button>
+        ${voiceHTML}
+      </div>
+      <p class="preview-label">Preview — the first pages</p>
+      <div class="reader-text">${paras.map(p => "<p>" + escapeHtml(p) + "</p>").join("")}</div>
+      <p class="preview-end">— Preview ends here —</p>
+      <div class="gate-box">
+        <h3>Keep reading ${escapeHtml(book.title)}?</h3>
+        <p class="muted">The preview ends here. Sign up to read the full story — and listen to the full audiobook in any of the 12 narrator voices.</p>
+        <button class="btn btn-primary" id="gateReadBtn" type="button">Read the Full Story — Sign Up</button>
+        <button class="btn btn-ghost" id="gateListenBtn" type="button">Listen to the Full Story — Sign Up</button>
+        <p class="small muted">Already a member? <button class="link-btn" id="gateLoginBtn" type="button">Log in</button></p>
+        <p class="small muted">Listener $9.99/mo · Author $24.99/mo · Cancel anytime</p>
+      </div>
+    </article>`;
+    const gateContext = "You picked “" + book.title + "”. Sign up to read the full story — and listen to the full audiobook.";
+    $("#gateReadBtn").addEventListener("click", () => openSignup(gateContext));
+    $("#gateListenBtn").addEventListener("click", () => openSignup(gateContext));
+    $("#gateLoginBtn").addEventListener("click", () => openModal("loginModal"));
+    $("#readerListenPreviewBtn").addEventListener("click", () => {
+      loadBook(book, $("#readerVoiceSelect").value, true);
+      document.getElementById("player").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+    $("#readerVoiceSelect").addEventListener("change", e => setVoice(e.target.value));
+  }
+}
 
 /* ---------- Made For You form ---------- */
 
@@ -521,16 +929,23 @@ function buildOutline() {
   const length = $("#wfLength").value;
   const count = (length === "long" || length === "longpremium") ? 24 : 16;
   const titles = OUTLINE_TITLES.slice(0, count);
-  $("#wfOutlineTitle").textContent = "Your chapter outline — " + genre + " (" + count + " chapters)";
+  $("#wfOutlineTitle").textContent = "Your chapter outline — " + genre + " (" + count + " chapters)" + (writeMode() === "child" ? " — age-appropriate" : "");
   $("#wfOutlineList").innerHTML = titles.map((t, i) =>
     "<li><strong>Chapter " + (i + 1) + ":</strong> " + escapeHtml(t) + "</li>"
   ).join("");
+  $("#wfOutlineNote").textContent = writeMode() === "child"
+    ? "This outline is age-appropriate: no sexual content, no adult themes. In the full product, each chapter is written from the story bible, and you approve each one before the next is written."
+    : "This outline is a preview. In the full product, each chapter is written from the story bible, and you approve each one before the next is written.";
   showWriteStep(2);
 }
 
 function buildQuestions() {
   const wrap = $("#wfQuestions");
-  wrap.innerHTML = REVISION_QUESTIONS.map((q, i) => `
+  const questions = revisionQuestionsForMode();
+  $("#wfQuestionsIntro").textContent = writeMode() === "child"
+    ? "Answer in your own words. These questions are written for young writers — everything stays age-appropriate: no sexual content, no adult themes."
+    : "Answer in your own words. Your answers direct the revision — the AI never changes the meaning of your story, only the writing.";
+  wrap.innerHTML = questions.map((q, i) => `
     <div class="q-item">
       <label for="wq${i}">${i + 1}. ${escapeHtml(q[0])} <span>— ${escapeHtml(q[1])}</span></label>
       <textarea id="wq${i}" placeholder="Your answer, in your own words…"></textarea>
@@ -543,68 +958,87 @@ $("#wfQuestionsBtn").addEventListener("click", buildQuestions);
 $("#wfFinishBtn").addEventListener("click", () => showWriteStep(4));
 $("#wfRestartBtn").addEventListener("click", () => showWriteStep(1));
 
-/* ---------- Modals: age gate, sign up, log in ---------- */
+// Child / adult mode toggle (Write Your Own). The Adult button is
+// disabled for visitors and child accounts — see updateWriteModeUI.
+$("#modeChildBtn").addEventListener("click", () => setWriteMode("child"));
+$("#modeAdultBtn").addEventListener("click", () => setWriteMode("adult"));
+
+/* ---------- Modals: sign up, log in ---------- */
 
 function openModal(id) { $("#" + id).classList.add("open"); }
 function closeModal(id) { $("#" + id).classList.remove("open"); }
 $$("[data-close-modal]").forEach(btn => btn.addEventListener("click", () => closeModal(btn.dataset.closeModal)));
 $$(".modal-backdrop").forEach(bd => bd.addEventListener("click", e => {
-  if (e.target === bd && bd.id !== "ageGate") bd.classList.remove("open");
+  if (e.target === bd) bd.classList.remove("open");
 }));
 
-// Age gate: 18+ only. Remembered in this browser.
-if (!localStorage.getItem("ydb-age-ok")) {
-  openModal("ageGate");
-}
-$("#ageConfirmBtn").addEventListener("click", () => {
-  localStorage.setItem("ydb-age-ok", "1");
-  closeModal("ageGate");
-});
-$("#ageDenyBtn").addEventListener("click", () => {
-  $("#ageDenyMsg").hidden = false;
-});
-
-// Sign up
-$("#signupBtn").addEventListener("click", () => openModal("signupModal"));
-$("#loginBtn").addEventListener("click", () => openModal("loginModal"));
-$$("[data-plan]").forEach(btn => btn.addEventListener("click", () => {
-  $("#suPlan").value = btn.dataset.plan;
+// Sign up / log in — DEMO sign-in: no backend yet. Signing up or
+// logging in sets the simulated signed-in state (localStorage) so
+// the preview gate can be tested. Real accounts + Stripe at launch.
+function openSignup(context) {
+  $("#signupContext").textContent = context || "Join YourDailyBook. Your first book is waiting.";
+  // Reset the modal to the form (a previous sign-up may have left the success view showing).
+  $("#signupFormWrap").hidden = false;
+  $("#signupSuccess").hidden = true;
   openModal("signupModal");
+}
+
+$("#signupBtn").addEventListener("click", () => openSignup());
+$("#loginBtn").addEventListener("click", () => openModal("loginModal"));
+$("#signoutBtn").addEventListener("click", signOut);
+$$("[data-plan]").forEach(btn => btn.addEventListener("click", () => {
+  const plan = btn.dataset.plan;
+  $("#suPlan").value = plan;
+  openSignup(plan === "author"
+    ? "You picked the Author plan ($24.99/month) — daily books, your weekly book, plus a Write Your Own book every month."
+    : "You picked the Listener plan ($9.99/month) — a new book in every genre, every day, plus your weekly personalized book.");
 }));
 
 $("#signupForm").addEventListener("submit", e => {
   e.preventDefault();
-  const dob = new Date($("#suDob").value);
+  const dobValue = $("#suDob").value;
+  const dob = new Date(dobValue);
   if (isNaN(dob.getTime())) { alert("Please enter your date of birth."); return; }
-  const age = (Date.now() - dob.getTime()) / (365.25 * 24 * 3600 * 1000);
-  if (age < 18) {
-    alert("YourDailyBook is 18+ only. You must be 18 or older to sign up.");
-    return;
-  }
   if (!$("#suAge").checked) {
-    alert("Please confirm you're 18 or older.");
+    alert("Please agree to the Terms of Service.");
     return;
   }
-  // PLACEHOLDER: no account/billing backend yet. Waitlist-style confirmation.
+  // PLACEHOLDER: no account/billing backend yet. Demo sign-in only.
+  // The date of birth sets the account's content mode: under 18
+  // signs in as a child account (child-safe content, locked to
+  // Child mode); 18+ signs in as an adult.
+  signIn($("#suName").value.trim(), dobValue);
+  $("#signupSuccessTitle").textContent = "Welcome to YourDailyBook, " + auth.name + "!";
+  $("#signupSuccessText").textContent = auth.isAdult
+    ? "You're signed in. The full story is unlocked — go read it."
+    : "You're signed in in Child mode — age-appropriate books only. A parent or guardian manages payment for your account.";
   $("#signupFormWrap").hidden = true;
   $("#signupSuccess").hidden = false;
 });
 
 $("#loginForm").addEventListener("submit", e => {
   e.preventDefault();
-  // PLACEHOLDER: no account backend yet.
-  e.target.innerHTML = '<p class="muted">Account sign-in opens at launch. If you signed up for the waitlist, we\'ll email you your login. Questions? <a href="mailto:support@yourdailybook.com">support@yourdailybook.com</a></p>';
+  // PLACEHOLDER: demo sign-in — any email/password works. The name
+  // is taken from the email address. Real accounts open at launch.
+  const email = $("#liEmail").value.trim();
+  const name = email.split("@")[0].replace(/[._\-+]+/g, " ").replace(/\b\w/g, c => c.toUpperCase()) || "Reader";
+  signIn(name);
+  closeModal("loginModal");
 });
 
 /* ---------- Init ---------- */
 
 (function init() {
+  updateAuthUI(); // restore the signed-in header for returning demo users
   // Fill voice selects (player + Made For You form + Write Your Own genre select).
   $("#playerVoiceSelect").innerHTML = voiceOptionsHTML("Warm");
   $("#pfVoice").innerHTML = voiceOptionsHTML("Warm");
   $("#wfGenre").innerHTML = GENRES.map(g => "<option>" + escapeHtml(g) + "</option>").join("");
   renderPfGenres();
   renderGenrePills();
+  renderSpiceFilter(); // age-capped spice choices for the catalog
+  renderPfSpice();     // age-capped spice choices for Made For You
+  updateWriteModeUI(); // child/adult toggle state for Write Your Own
   renderBooks();
   renderChapterList();
   updateSleepBtn();
