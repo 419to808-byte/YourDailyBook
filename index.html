@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YourDailyBook — A new audiobook every day, written by AI, read by AI</title>
+<meta name="description" content="YourDailyBook is an audiobook service where every book is written by AI and read by an AI voice. A new book in every genre, every day. One made just for you every week. And when you're ready, make your own.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ================= Header ================= -->
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="index.html">
+      <span class="logo-mark" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      </span>
+      <span>YourDailyBook<small>AI Audiobooks</small></span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">☰</button>
+    <nav class="main-nav" id="mainNav" aria-label="Main navigation">
+      <a href="#tabs" data-nav-tab="daily">Daily Books</a>
+      <a href="#tabs" data-nav-tab="made">Made For You</a>
+      <a href="#tabs" data-nav-tab="write">Write Your Own</a>
+      <a href="#pricing">Pricing</a>
+      <a href="policies.html">Policies</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn-ghost btn-sm" id="loginBtn" type="button">Log In</button>
+      <button class="btn btn-primary btn-sm" id="signupBtn" type="button">Sign Up</button>
+    </div>
+  </div>
+</header>
+
+<main>
+<!-- ================= Hero ================= -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">Audiobook-first · All genres · 18+ only</span>
+      <h1>A new audiobook every day, <em>one made just for you</em> every week — and when you're ready, <em>make your own.</em></h1>
+      <p class="hero-sub">Every book on YourDailyBook is written by AI and read by an AI voice — and we say so openly. A fresh book in every genre, every single day. A personal story made from your details, every week. And a tool that lets writers turn their idea into a finished book they can sell.</p>
+      <div class="hero-ctas">
+        <button class="btn btn-primary" data-cta-tab="daily" type="button">▶ Start Listening</button>
+        <a class="btn btn-ghost" href="#pricing">See Plans — from $9.99/mo</a>
+      </div>
+      <p class="hero-note"><strong>Listener $9.99/mo</strong> · <strong>Author $24.99/mo</strong> · Cancel anytime · Every book carries the <span class="badge badge-ai-dark">AI-Generated</span> badge</p>
+      <div class="hero-stats">
+        <div class="hero-stat"><b>10</b><span>genres, a new book<br>in each, every day</span></div>
+        <div class="hero-stat"><b>12</b><span>descriptive narrator<br>voices to choose from</span></div>
+        <div class="hero-stat"><b>1 / week</b><span>personalized book,<br>made just for you</span></div>
+      </div>
+    </div>
+    <div class="hero-covers" aria-hidden="true">
+      <div class="hero-cover g0"><span class="cover-kicker">Romance · New today</span><span class="cover-title">The Lighthouse Keeper's Wife</span><span class="cover-meta">5h 12m · Spice 3</span></div>
+      <div class="hero-cover g1"><span class="cover-kicker">Science Fiction · New today</span><span class="cover-title">The Last Signal from Europa</span><span class="cover-meta">5h 48m · Spice 1</span></div>
+      <div class="hero-cover g4"><span class="cover-kicker">Mystery · New today</span><span class="cover-title">The Clockmaker's Alibi</span><span class="cover-meta">4h 56m · Spice 2</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= Tabs ================= -->
+<div class="tabs-bar" id="tabs">
+  <div class="wrap">
+    <div class="tabs" role="tablist" aria-label="Main sections">
+      <button class="tab-btn active" role="tab" data-tab="daily" aria-selected="true" type="button">Daily Books</button>
+      <button class="tab-btn" role="tab" data-tab="made" aria-selected="false" type="button">Made For You</button>
+      <button class="tab-btn" role="tab" data-tab="write" aria-selected="false" type="button">Write Your Own</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ===== Daily Books panel ===== -->
+<section class="tab-panel active" id="panel-daily" role="tabpanel" aria-label="Daily Books">
+  <div class="section-head">
+    <span class="eyebrow">Daily Books</span>
+    <h2>Today's books — one in every genre</h2>
+    <p>A brand-new book in each genre lands every morning. Pick a genre, pick a voice, press play. Your place is saved if you switch to reading, and you can change voices mid-sentence without losing your place.</p>
+  </div>
+  <div class="genre-row" id="genreRow" role="group" aria-label="Filter by genre"></div>
+  <div class="filter-row">
+    <label for="spiceFilter">Spice level:</label>
+    <select id="spiceFilter" style="width:auto">
+      <option value="0">Show all</option>
+      <option value="1">1 — Sweet</option>
+      <option value="2">2 — Mild</option>
+      <option value="3">3 — Steamy</option>
+      <option value="4">4 — Open-door</option>
+    </select>
+    <span class="small muted" id="bookCount"></span>
+  </div>
+  <div class="book-grid" id="bookGrid"></div>
+  <p class="small muted mt-3">Catalog books are fiction only, tagged by spice level, and go through a human quality check before they publish. See our <a href="policies.html#community-guidelines">Community Guidelines</a>.</p>
+</section>
+
+<!-- ===== Made For You panel ===== -->
+<section class="tab-panel" id="panel-made" role="tabpanel" aria-label="Made For You">
+  <div class="section-head">
+    <span class="eyebrow">Made For You</span>
+    <h2>Your book, every week</h2>
+    <p>Once a week, a short story is written just for you — built from the details you put in at signup. It's your story, about you, in the genres and spice level you choose. Change your details anytime on your account page and your next book changes with them.</p>
+  </div>
+  <div class="split">
+    <div class="card">
+      <h3>Tell us about you</h3>
+      <p class="muted small">Your details are used <strong>only</strong> to generate your book. They are never sold, never shared with advertisers, and never used to train AI. You can change or delete them anytime.</p>
+      <form id="personalizeForm">
+        <div class="form-field">
+          <label for="pfName">Your name</label>
+          <input type="text" id="pfName" placeholder="e.g., Alex" required>
+        </div>
+        <div class="form-field">
+          <label for="pfAbout">A short description of yourself</label>
+          <textarea id="pfAbout" placeholder="A few sentences — what you love, where you're from, what kind of hero you want to be…"></textarea>
+          <div class="hint">This is what the story is built from. Keep it as short or as detailed as you like.</div>
+        </div>
+        <div class="form-field">
+          <label>Favorite genres <span class="hint">(pick up to 3)</span></label>
+          <div class="check-row" id="pfGenres"></div>
+        </div>
+        <div class="form-field">
+          <label for="pfSpice">Preferred spice level</label>
+          <select id="pfSpice">
+            <option value="1">1 — Sweet</option>
+            <option value="2" selected>2 — Mild</option>
+            <option value="3">3 — Steamy</option>
+            <option value="4">4 — Open-door</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="pfVoice">Your narrator voice</label>
+          <select id="pfVoice"></select>
+          <div class="hint">You can switch voices anytime — even mid-sentence — without losing your place.</div>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Preview My Weekly Book</button>
+      </form>
+    </div>
+    <div>
+      <div class="card" id="personalPreview">
+        <span class="badge badge-ai-dark">AI-Generated</span>
+        <h3 class="mt-2">Your weekly book appears here</h3>
+        <p class="muted">Fill in the form and preview what your personalized weekly story could look like. Subscribers get a new one every week — about 30 minutes of listening, in the voice you picked.</p>
+        <p class="small muted">Included with both plans: <strong>Listener $9.99/mo</strong> and <strong>Author $24.99/mo</strong>.</p>
+      </div>
+      <div class="callout teal mt-3">
+        <p><strong>Your details stay yours.</strong> We use them only to write your book. We never sell them, never share them with advertisers, and never use them to train AI models. Delete them anytime from your account page.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Write Your Own panel ===== -->
+<section class="tab-panel" id="panel-write" role="tabpanel" aria-label="Write Your Own">
+  <div class="section-head">
+    <span class="eyebrow">Write Your Own — for writers</span>
+    <h2>Turn your idea into a book you can sell</h2>
+    <p>Write Your Own is a tool for writers. Bring your idea — the AI writes the book chapter by chapter, you revise it with a guided question set, and you leave with a finished book and a license to sell it on Amazon KDP, Gumroad, or anywhere else. You keep the revenue.</p>
+  </div>
+
+  <div class="split">
+    <div>
+      <ol class="step-list">
+        <li><span class="step-num">1</span><div><h4>Describe your book</h4><p>Your idea, your characters, your world — plus a short description of yourself. The AI builds a story bible from it so the book stays consistent.</p></div></li>
+        <li><span class="step-num">2</span><div><h4>The AI writes it, chapter by chapter</h4><p>One chapter at a time, following the story bible. You watch each chapter land and approve it before the next one starts.</p></div></li>
+        <li><span class="step-num">3</span><div><h4>Revise with 15 guided questions</h4><p>After each chapter, answer questions about plot, dialogue, pacing, emotion, and more — in your own words, in open text boxes. The AI revises from your direction.</p></div></li>
+        <li><span class="step-num">4</span><div><h4>Leave with a Rough Draft + a license to sell</h4><p>Your book is delivered as a <strong>rough draft</strong> — never as a final, publication-ready product. Final editing is your job (or your editor's). And you get the license to sell it and keep every dollar.</p></div></li>
+      </ol>
+      <div class="callout red mt-3">
+        <p><strong><span class="badge badge-rough">Rough Draft</span></strong></p>
+        <p>A book made with Write Your Own is released as a rough draft, not a final product. You are responsible for final editing, proofreading, and preparation for publication. Our revision system gets the draft as close to final as possible — but the final polish is yours.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Try the flow</h3>
+      <p class="muted small">A short preview of how a book is built. No real book is generated here — this shows the steps.</p>
+      <div id="writeStep1">
+        <div class="form-field">
+          <label for="wfIdea">Your book idea</label>
+          <textarea id="wfIdea" placeholder="A retired detective returns to her hometown when the lighthouse goes dark for the first time in forty years…"></textarea>
+        </div>
+        <div class="form-field">
+          <label for="wfAbout">A short description of yourself</label>
+          <textarea id="wfAbout" placeholder="I write on weekends and I love twisty mysteries with a warm heart…"></textarea>
+        </div>
+        <div class="form-field">
+          <label for="wfGenre">Genre</label>
+          <select id="wfGenre"></select>
+        </div>
+        <div class="form-field">
+          <label for="wfLength">Book size</label>
+          <select id="wfLength">
+            <option value="standard">Standard Book — 60,000 words, ~16 chapters — $99</option>
+            <option value="premium">Premium Book — 60,000 words, best prose — $199</option>
+            <option value="long">Long Book (Standard) — 90,000 words, ~24 chapters — $149</option>
+            <option value="longpremium">Long Book (Premium) — 90,000 words, best prose — $299</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-block" id="wfOutlineBtn" type="button">Build My Chapter Outline</button>
+      </div>
+      <div id="writeStep2" class="hidden">
+        <h4 id="wfOutlineTitle">Your chapter outline</h4>
+        <ol id="wfOutlineList" class="small" style="padding-left: 20px;"></ol>
+        <p class="small muted">This outline is a preview. In the full product, each chapter is written from the story bible, and you approve each one before the next is written.</p>
+        <button class="btn btn-dark btn-block" id="wfQuestionsBtn" type="button">See the Revision Questions →</button>
+      </div>
+      <div id="writeStep3" class="hidden">
+        <h4>Revise Chapter 1 — 15 questions</h4>
+        <p class="small muted">Answer in your own words. Your answers direct the revision — the AI never changes the meaning of your story, only the writing.</p>
+        <div class="q-list" id="wfQuestions"></div>
+        <button class="btn btn-primary btn-block" id="wfFinishBtn" type="button">See What a $5 Revision Includes</button>
+      </div>
+      <div id="writeStep4" class="hidden">
+        <h4>What a $5 revision includes</h4>
+        <ul class="small" style="padding-left: 20px;">
+          <li><strong>Your feedback, applied</strong> — your question answers + open text direct the rewrite.</li>
+          <li><strong>3 different revised versions</strong> to choose from — e.g., dialogue-focused, description-focused, balanced. Pick the best, or mix parts.</li>
+          <li><strong>A full quality check</strong> on the version you pick — continuity vs. the story bible, dialogue, pacing, emotion, description, grammar.</li>
+          <li><strong>A change summary</strong> — what changed and why.</li>
+          <li><strong>Free self-editing after picking</strong> — tweak the text yourself for free. You only pay again for another full AI revision round.</li>
+        </ul>
+        <p class="small muted">1 revision per chapter is included with your book. Extra revisions are $5 per chapter — and there's no cap, as long as each one is paid for. Your book-in-progress is saved, so you can leave and pick up exactly where you left off, anytime. No time limit, no expiry.</p>
+        <button class="btn btn-ghost btn-block" id="wfRestartBtn" type="button">Start Over</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-3">
+    <h3>Writer pricing</h3>
+    <div class="card" style="overflow-x:auto;">
+      <table class="price-table">
+        <thead><tr><th>Book</th><th>What you get</th><th>Price</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Standard Book</strong></td><td>60,000 words (~16 chapters), 1 revision per chapter included, full license to sell</td><td><strong>$99</strong></td></tr>
+          <tr><td><strong>Premium Book</strong></td><td>60,000 words, best prose, 1 revision per chapter included, full license to sell</td><td><strong>$199</strong></td></tr>
+          <tr><td><strong>Long Book (Standard)</strong></td><td>90,000 words (~24 chapters), 1 revision per chapter included, full license to sell</td><td><strong>$149</strong></td></tr>
+          <tr><td><strong>Long Book (Premium)</strong></td><td>90,000 words, best prose, 1 revision per chapter included, full license to sell</td><td><strong>$299</strong></td></tr>
+          <tr><td><strong>Extra revision</strong></td><td>One more full-chapter revision round (3 versions, quality check, change summary)</td><td><strong>$5 / chapter</strong></td></tr>
+          <tr><td><strong>À la carte chapter</strong></td><td>One extra chapter, 1 revision included</td><td><strong>$7 / chapter</strong></td></tr>
+        </tbody>
+      </table>
+      <p class="fee-note">For prolific writers: <strong>Author Plan $199/month</strong> (2 Standard Books a month, or 1 Premium) · <strong>Prolific Plan $399/month</strong> (5 Standard Books a month). Every book comes with a full license to sell — and you keep the revenue.</p>
+      <p class="fee-note">A $99 book sold on Amazon KDP at $4.99 (about $3.49 per sale after royalty) pays for itself after roughly 29 sales. After that, every sale is yours.</p>
+    </div>
+  </div>
+</section>
+</div><!-- /wrap (tabs) -->
+
+<!-- ================= Pricing ================= -->
+<section class="section" id="pricing" style="background: var(--paper-2);">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Pricing</span>
+      <h2>Listen for $9.99. Write for $24.99.</h2>
+      <p>Two plans. Both include the daily books and your weekly personalized book. Author adds a build-your-own book every month.</p>
+    </div>
+    <div class="price-grid">
+      <div class="price-card">
+        <div class="price-name">Listener</div>
+        <div class="price-amount">$9.99<span> / month</span></div>
+        <ul>
+          <li>A new book in every genre, every day</li>
+          <li>Your personalized book, once a week</li>
+          <li>Listen in any of the 12 narrator voices — switch anytime</li>
+          <li>Read along with the text, your place saved</li>
+          <li>Background playback, offline download, sleep timer</li>
+          <li>Cancel anytime</li>
+        </ul>
+        <button class="btn btn-ghost btn-block" data-plan="listener" type="button">Choose Listener</button>
+      </div>
+      <div class="price-card featured">
+        <span class="price-flag">Most popular</span>
+        <div class="price-name">Author</div>
+        <div class="price-amount">$24.99<span> / month</span></div>
+        <ul>
+          <li>Everything in Listener</li>
+          <li>One Write Your Own book every month (~16 chapters)</li>
+          <li>1 revision per chapter included on your book</li>
+          <li>Your book delivered as a Rough Draft with a license to sell</li>
+          <li>Pick up where you left off — no time limit, no expiry</li>
+          <li>Cancel anytime</li>
+        </ul>
+        <button class="btn btn-primary btn-block" data-plan="author" type="button">Choose Author</button>
+      </div>
+    </div>
+    <div class="card mt-3">
+      <h3>About the upfront fee</h3>
+      <p>When you sign up, we do the pre-render work right then — caching the tone, tempo, and emotion directions for the books, and rendering the launch catalog in the narrator voices. That work happens the moment signup completes, so the one-time upfront fee is <strong>non-refundable once signup is complete</strong>. You'll see the exact amount before you pay.</p>
+      <p class="small muted">Upfront fee: $[amount] — to be set. Payments are handled securely by Stripe. We never see or store your card number.</p>
+      <p class="small muted">Buying the license to a story (readers): you can buy the license to a story you love — it's removed from the catalog and sent to you, exclusively. Price varies by book and will be shown on each book's page.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= Policies preview ================= -->
+<section class="section" id="policies-preview">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Policies</span>
+      <h2>Plain language, no legalese</h2>
+      <p>Everything we do is written down in plain language — what we collect, what the AI will and won't write, who owns what, and how to delete your data. The full policy text is being finalized with a lawyer before launch; these are the rules we're building to.</p>
+    </div>
+    <div class="policy-grid">
+      <a class="policy-card" href="policies.html#terms-of-service"><h3>Terms of Service</h3><p>The contract: what the service is, who's allowed to use it (18+ only), plans, billing, and cancellation.</p><span class="policy-link">Read the summary →</span></a>
+      <a class="policy-card" href="policies.html#privacy-policy"><h3>Privacy Policy</h3><p>What we collect, why, and what we never do with it — your details are never sold and never used to train AI.</p><span class="policy-link">Read the summary →</span></a>
+      <a class="policy-card" href="policies.html#content-ai-disclosure"><h3>Content &amp; AI Disclosure</h3><p>Every book is AI-generated and we say so openly. What the catalog allows, what's unchained, and the one hard rule.</p><span class="policy-link">Read the summary →</span></a>
+      <a class="policy-card" href="policies.html#licensing-ownership"><h3>Licensing &amp; Ownership</h3><p>Who owns what, how buying a license works, and what a writer gets when they pay for a book.</p><span class="policy-link">Read the summary →</span></a>
+      <a class="policy-card" href="policies.html#refunds-cancellation"><h3>Refunds &amp; Cancellation</h3><p>Cancel anytime, how refunds work, and why the upfront fee is non-refundable after signup.</p><span class="policy-link">Read the summary →</span></a>
+      <a class="policy-card" href="policies.html#how-it-works"><h3>How It Works</h3><p>The plain-language guide: the three tabs, the voices, the upfront fee, and your subscription.</p><span class="policy-link">Read the summary →</span></a>
+      <a class="policy-card" href="policies.html#community-guidelines"><h3>Community Guidelines</h3><p>The rules for the shared catalog: fiction only, spice levels, quality, and how reporting works.</p><span class="policy-link">Read the summary →</span></a>
+      <a class="policy-card" href="policies.html#age-verification"><h3>Age Verification / 18+</h3><p>The service is 18+ only. How we check, and what happens if we learn a user is under 18.</p><span class="policy-link">Read the summary →</span></a>
+      <a class="policy-card" href="policies.html#data-deletion"><h3>Data Deletion</h3><p>How to delete your details or your whole account, what gets deleted, and how long it takes.</p><span class="policy-link">Read the summary →</span></a>
+    </div>
+    <p class="mt-3"><a class="btn btn-ghost" href="policies.html">Open the Policies Hub →</a></p>
+  </div>
+</section>
+</main>
+
+<!-- ================= Footer ================= -->
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <h4>YourDailyBook</h4>
+        <p>A new audiobook every day, one made just for you every week — and when you're ready, make your own. Every book is written by AI and narrated by an AI voice.</p>
+        <p><strong>18+ only.</strong> This service is for adults.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#tabs" data-nav-tab="daily">Daily Books</a></li>
+          <li><a href="#tabs" data-nav-tab="made">Made For You</a></li>
+          <li><a href="#tabs" data-nav-tab="write">Write Your Own</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Support &amp; Policies</h4>
+        <ul>
+          <li><a href="mailto:support@yourdailybook.com">support@yourdailybook.com</a></li>
+          <li><a href="policies.html">Policies Hub</a></li>
+          <li><a href="policies.html#privacy-policy">Privacy Policy</a></li>
+          <li><a href="policies.html#data-deletion">Delete My Data</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 YourDailyBook. All rights reserved.</span>
+      <span>Every book on YourDailyBook is AI-generated — written by AI, read by AI.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ================= Sticky audio player ================= -->
+<div class="player" id="player" role="region" aria-label="Audio player">
+  <div class="player-inner">
+    <div class="player-cover g0" id="playerCover">YD</div>
+    <div class="player-info">
+      <div class="player-title" id="playerTitle">Pick a book to start listening</div>
+      <div class="player-sub" id="playerSub">Daily Books · No book playing</div>
+    </div>
+    <div class="player-controls">
+      <button class="player-btn" id="prevChapterBtn" type="button" aria-label="Previous chapter" title="Previous chapter">⏮</button>
+      <button class="player-btn play" id="playPauseBtn" type="button" aria-label="Play" title="Play / pause">▶</button>
+      <button class="player-btn" id="nextChapterBtn" type="button" aria-label="Next chapter" title="Next chapter">⏭</button>
+    </div>
+    <div class="player-progress">
+      <span class="player-time" id="timeCurrent">0:00</span>
+      <div class="progress-track" id="progressTrack" role="slider" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <span class="player-time" id="timeTotal">0:00</span>
+    </div>
+    <div class="player-tools">
+      <select id="speedSelect" aria-label="Playback speed" title="Playback speed">
+        <option value="0.75">0.75×</option>
+        <option value="1" selected>1×</option>
+        <option value="1.25">1.25×</option>
+        <option value="1.5">1.5×</option>
+        <option value="2">2×</option>
+      </select>
+      <select id="playerVoiceSelect" aria-label="Narrator voice" title="Narrator voice"></select>
+      <button class="tool-btn" id="sleepBtn" type="button" title="Sleep timer">💤 Off</button>
+      <button class="tool-btn" id="chaptersBtn" type="button" title="Chapter list">☰ Chapters</button>
+    </div>
+  </div>
+</div>
+
+<!-- Chapter list panel -->
+<div class="chapter-panel" id="chapterPanel" role="dialog" aria-label="Chapter list">
+  <h3 id="chapterPanelTitle">Chapters</h3>
+  <p class="sub" id="chapterPanelSub"></p>
+  <ol class="chapter-list" id="chapterList" style="list-style:none;"></ol>
+</div>
+
+<!-- ================= Age gate modal ================= -->
+<div class="modal-backdrop" id="ageGate" role="dialog" aria-modal="true" aria-labelledby="ageGateTitle">
+  <div class="modal">
+    <h2 id="ageGateTitle">Adults only — 18+</h2>
+    <p>YourDailyBook is an audiobook service for adults. The catalog includes steamy content for adult readers, so the service is <strong>18+ only</strong>. There are no accounts for anyone under 18.</p>
+    <p class="small muted">We also never generate, store, or allow sexual content involving minors, in any form. That rule has no exceptions.</p>
+    <button class="btn btn-primary btn-block" id="ageConfirmBtn" type="button">I'm 18 or older — Enter</button>
+    <button class="btn btn-ghost btn-block mt-2" id="ageDenyBtn" type="button">I'm under 18</button>
+    <p class="fine-print mt-2" id="ageDenyMsg" hidden>If you're under 18, this service isn't for you yet. Please come back when you're 18.</p>
+  </div>
+</div>
+
+<!-- ================= Sign up modal ================= -->
+<div class="modal-backdrop" id="signupModal" role="dialog" aria-modal="true" aria-labelledby="signupTitle">
+  <div class="modal">
+    <button class="modal-close" data-close-modal="signupModal" type="button" aria-label="Close">✕</button>
+    <div id="signupFormWrap">
+      <h2 id="signupTitle">Create your account</h2>
+      <p class="muted">Join YourDailyBook. Your first book is waiting.</p>
+      <form id="signupForm">
+        <div class="form-field">
+          <label for="suPlan">Plan</label>
+          <select id="suPlan">
+            <option value="listener">Listener — $9.99/month</option>
+            <option value="author">Author — $24.99/month</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="suName">Your name</label>
+          <input type="text" id="suName" placeholder="Your name" required>
+        </div>
+        <div class="form-field">
+          <label for="suEmail">Email</label>
+          <input type="email" id="suEmail" placeholder="you@example.com" required>
+        </div>
+        <div class="form-field">
+          <label for="suDob">Date of birth</label>
+          <input type="date" id="suDob" required>
+          <div class="hint">You must be 18 or older. We check this at signup.</div>
+        </div>
+        <div class="form-field">
+          <label style="display:flex; gap:8px; align-items:flex-start; font-weight:400;">
+            <input type="checkbox" id="suAge" style="width:auto; margin-top:4px;" required>
+            <span>I confirm I'm 18 or older, and I've read the <a href="policies.html" target="_blank">Policies</a>.</span>
+          </label>
+        </div>
+        <div class="callout mb-2">
+          <p><strong>About the upfront fee.</strong> When you sign up, we immediately do the pre-render work — caching the tone, tempo, and emotion directions and rendering the launch catalog in the narrator voices. That work happens the moment signup completes, so the one-time upfront fee ($[amount], to be set) is <strong>non-refundable once signup is complete</strong>. Payment is handled securely by Stripe — we never see or store your card number.</p>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Create Account</button>
+        <p class="fine-print mt-2">By signing up you agree to the Terms of Service and Privacy Policy. Cancel anytime from your account page.</p>
+      </form>
+    </div>
+    <div id="signupSuccess" class="form-success" hidden>
+      <div class="big-check">✓</div>
+      <h2>You're on the list!</h2>
+      <p class="muted">Thanks for joining YourDailyBook. Account creation and checkout aren't live yet — we'll email you the moment they are, and your spot is saved.</p>
+      <button class="btn btn-primary" data-close-modal="signupModal" type="button">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= Log in modal ================= -->
+<div class="modal-backdrop" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+  <div class="modal">
+    <button class="modal-close" data-close-modal="loginModal" type="button" aria-label="Close">✕</button>
+    <h2 id="loginTitle">Welcome back</h2>
+    <p class="muted">Log in to pick up your books right where you left off.</p>
+    <form id="loginForm">
+      <div class="form-field">
+        <label for="liEmail">Email</label>
+        <input type="email" id="liEmail" placeholder="you@example.com" required>
+      </div>
+      <div class="form-field">
+        <label for="liPass">Password</label>
+        <input type="password" id="liPass" placeholder="Your password" required>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Log In</button>
+      <p class="fine-print mt-2">Account sign-in isn't live yet — it opens with launch. Questions? <a href="mailto:support@yourdailybook.com">support@yourdailybook.com</a></p>
+    </form>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
