@@ -463,54 +463,116 @@ function filteredBooks() {
   );
 }
 
+/* ---------- Daily shuffle (All view) ---------- */
+/* TY Nov 5 ~11:08 PM (approved): the "All" genre view shows the books
+   in a random order, shuffled once a day — the same order for everyone
+   all day, fresh tomorrow. NOT re-randomized on every reload (that
+   would feel unstable). The shuffle is seeded by the current date
+   (YYYY-MM-DD), so it is stable within the day. Single-genre views
+   keep their normal order, and the starting genre stays "All" (not a
+   random genre). The "New today" badge stays on every card, so the
+   newest books are still clearly marked in the shuffle. */
+
+function seedFromString(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// Deterministic shuffle of a copy of arr, seeded by seedStr.
+function shuffleWithSeed(arr, seedStr) {
+  const rand = mulberry32(seedFromString(seedStr));
+  const out = arr.slice();
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    const tmp = out[i]; out[i] = out[j]; out[j] = tmp;
+  }
+  return out;
+}
+
+function todayKey(d) {
+  const date = d || new Date();
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return y + "-" + m + "-" + day;
+}
+
+// Shuffle the "All" view once a day. dateKey is an optional
+// "YYYY-MM-DD" override (used by tests to simulate another day).
+function dailyShuffle(list, dateKey) {
+  if (activeGenre !== "All") return list;
+  return shuffleWithSeed(list, "ydb-" + (dateKey || todayKey()));
+}
+
 /* Book cards, post-style (TY Nov 5 ~10:43 PM): each card reads like a
    post — a slim gradient band, a title header, a meta line (genre,
    spice, chapter count, length), the opening text, and the Listen /
    Read actions with the voice picker. Written from scratch for
-   YourDailyBook; no code copied from any other project. */
-function renderBooks() {
-  const grid = $("#bookGrid");
-  const list = filteredBooks();
-  updateCatalogNote();
-  $("#bookCount").textContent = list.length + " book" + (list.length === 1 ? "" : "s") + " · New today";
-  if (list.length === 0) {
-    grid.innerHTML = '<div class="empty-state"><h3>No books match that filter</h3><p>Try a different genre or spice level.</p></div>';
-    return;
-  }
-  grid.innerHTML = list.map(b => {
-    const preview = bookPreviewText(b)[0];
-    const signedIn = isSignedIn();
-    return `
-    <article class="book-card" data-book-id="${b.id}">
-      <div class="book-cover ${b.grad}">
+   YourDailyBook; no code copied from any other project.
+   opts.removable adds an "✕ Remove" button (Currently Reading only).
+   opts.continuable adds a "▶ Continue" button (Currently Reading
+   only) that resumes the book from its saved position. */
+function bookCardHTML(book, opts) {
+  const preview = bookPreviewText(book)[0];
+  const signedIn = isSignedIn();
+  const removeBtn = (opts && opts.removable)
+    ? '<button class="btn btn-ghost btn-sm remove-cr" type="button" data-book-id="' + book.id + '" title="Remove from Currently Reading">✕ Remove</button>'
+    : "";
+  const continueBtn = (opts && opts.continuable)
+    ? '<button class="btn btn-dark btn-sm continue-book" type="button" data-book-id="' + book.id + '" title="Pick up where you left off">▶ Continue</button>'
+    : "";
+  return `
+    <article class="book-card" data-book-id="${book.id}">
+      <div class="book-cover ${book.grad}">
         <div class="cover-top">
-          <span class="cover-genre">${escapeHtml(b.genre)}</span>
+          <span class="cover-genre">${escapeHtml(book.genre)}</span>
           <span class="badge badge-ai">AI-Generated</span>
         </div>
       </div>
       <div class="book-body">
-        <h3 class="book-title">${escapeHtml(b.title)}</h3>
+        <h3 class="book-title">${escapeHtml(book.title)}</h3>
         <p class="book-meta">
-          <span>${escapeHtml(b.genre)}</span>
+          <span>${escapeHtml(book.genre)}</span>
           <span>📖 13 chapters</span>
-          <span>⏱ ${b.dur}</span>
-          <span class="badge badge-spice">Spice ${b.spice}</span>
+          <span>⏱ ${book.dur}</span>
+          <span class="badge badge-spice">Spice ${book.spice}</span>
           <span class="badge badge-new">New today</span>
         </p>
-        <p class="book-desc">${escapeHtml(b.desc)}</p>
+        <p class="book-desc">${escapeHtml(book.desc)}</p>
         <p class="preview-label">The opening pages</p>
         <p class="preview-snippet">${escapeHtml(preview)}</p>
         <div class="book-actions">
-          <button class="btn btn-primary btn-sm play-book" type="button" data-book-id="${b.id}">${signedIn ? "▶ Listen" : "▶ Preview"}</button>
-          <button class="btn btn-ghost btn-sm read-book" type="button" data-book-id="${b.id}">${signedIn ? "Read full story" : "Read preview"}</button>
+          ${continueBtn}
+          <button class="btn btn-primary btn-sm play-book" type="button" data-book-id="${book.id}">${signedIn ? "▶ Listen" : "▶ Preview"}</button>
+          <button class="btn btn-ghost btn-sm read-book" type="button" data-book-id="${book.id}">${signedIn ? "Read full story" : "Read preview"}</button>
           <div class="voice-select">
-            <select aria-label="Narrator voice for ${escapeHtml(b.title)}" data-book-voice="${b.id}">${voiceOptionsHTML("Warm")}</select>
+            <select aria-label="Narrator voice for ${escapeHtml(book.title)}" data-book-voice="${book.id}">${voiceOptionsHTML("Warm")}</select>
           </div>
+          ${removeBtn}
         </div>
       </div>
     </article>`;
-  }).join("");
+}
 
+// Wire the buttons/selects inside a rendered book grid (catalog or
+// Currently Reading): clicking a card opens the reader, Listen/Read
+// open the reader/player, voice selects switch the voice, and
+// ✕ Remove takes a book out of Currently Reading only.
+function wireBookGrid(grid) {
   // Clicking the card itself (not a button/select) opens the reader.
   $$(".book-card", grid).forEach(card => {
     const book = BOOKS.find(x => x.id === card.dataset.bookId);
@@ -534,6 +596,186 @@ function renderBooks() {
       setVoice(sel.value);
     }
   }));
+  $$(".remove-cr", grid).forEach(btn => btn.addEventListener("click", () => {
+    removeCurrentlyReading(btn.dataset.bookId);
+  }));
+  $$(".continue-book", grid).forEach(btn => btn.addEventListener("click", () => {
+    const book = BOOKS.find(x => x.id === btn.dataset.bookId);
+    const voiceSel = grid.querySelector('[data-book-voice="' + book.id + '"]');
+    continueBook(book, voiceSel ? voiceSel.value : "Warm");
+  }));
+}
+
+function renderBooks() {
+  const grid = $("#bookGrid");
+  const list = dailyShuffle(filteredBooks());
+  updateCatalogNote();
+  $("#bookCount").textContent = list.length + " book" + (list.length === 1 ? "" : "s") + " · New today";
+  if (list.length === 0) {
+    grid.innerHTML = '<div class="empty-state"><h3>No books match that filter</h3><p>Try a different genre or spice level.</p></div>';
+  } else {
+    grid.innerHTML = list.map(b => bookCardHTML(b)).join("");
+    wireBookGrid(grid);
+  }
+  renderCurrentlyReading();
+}
+
+/* ---------- Currently Reading ---------- */
+/* TY Nov 5 ~11:08 PM: any book the user opens (Read or Listen —
+   opening the reader or starting the player) goes into Currently
+   Reading, most recent first; opening it again moves it back to the
+   top. The section lives on the Daily Books tab above the book grid
+   and is hidden when empty. Each book has an ✕ Remove button that
+   takes it out of this section only — never out of the catalog.
+   The list persists in localStorage (demo; real backend storage at
+   launch) and respects the age filter, like the catalog.
+   The MOST IMPORTANT part is picking up where you left off (TY Nov 5
+   ~11:10 PM): every book also carries a saved position (see the
+   progress functions below) and a "Continue" button that resumes it. */
+
+const CURRENTLY_READING_KEY = "ydb-currently-reading";
+
+function currentlyReadingIds() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CURRENTLY_READING_KEY) || "[]");
+    if (!Array.isArray(saved)) return [];
+    return saved.filter(id => BOOKS.some(b => b.id === id));
+  } catch (e) { return []; }
+}
+
+function saveCurrentlyReading(ids) {
+  try { localStorage.setItem(CURRENTLY_READING_KEY, JSON.stringify(ids)); } catch (e) { /* storage unavailable */ }
+}
+
+// Add a book to Currently Reading (or move it back to the top if it
+// is already there). Called from openReader and loadBook.
+function markCurrentlyReading(book) {
+  if (!book) return;
+  const ids = currentlyReadingIds().filter(id => id !== book.id);
+  ids.unshift(book.id);
+  saveCurrentlyReading(ids);
+  renderCurrentlyReading();
+}
+
+// Remove a book from Currently Reading only — the book stays in the catalog.
+function removeCurrentlyReading(bookId) {
+  saveCurrentlyReading(currentlyReadingIds().filter(id => id !== bookId));
+  renderCurrentlyReading();
+}
+
+// Books in Currently Reading, most recent first, filtered by what
+// the user is allowed to see (age cap, same as the catalog).
+function currentlyReadingBooks() {
+  const cap = maxSpiceAllowed();
+  return currentlyReadingIds()
+    .map(id => BOOKS.find(b => b.id === id))
+    .filter(b => b && b.spice <= cap);
+}
+
+function renderCurrentlyReading() {
+  const section = $("#currentlyReading");
+  const grid = $("#currentlyReadingGrid");
+  const list = currentlyReadingBooks();
+  if (list.length === 0) {
+    section.classList.add("hidden");
+    grid.innerHTML = "";
+    return;
+  }
+  section.classList.remove("hidden");
+  grid.innerHTML = list.map(b => bookCardHTML(b, { removable: true, continuable: true })).join("");
+  wireBookGrid(grid);
+}
+
+/* ---------- Reading / listening progress (resume) ---------- */
+/* TY Nov 5 ~11:10 PM — the MOST IMPORTANT part of Currently Reading
+   is picking up where you left off. For every book the user opens,
+   the exact position is saved and restored on return:
+   - reading: chapter + paragraph (saved as the user scrolls the reader)
+   - listening: chapter + timestamp in seconds (saved as audio plays)
+   Stored in localStorage under `ydb-progress`, mapping book id to
+   { chapter, paragraph, timeSec }. The three values always describe
+   the SAME spot (the latest one, whether reached by reading or by
+   listening): a reading save sets the chapter/paragraph and the
+   timestamp of that chapter's start; a listening save sets the
+   chapter/timestamp and the paragraph that chapter maps to.
+   The paragraph <-> chapter mapping is a PLACEHOLDER for the demo
+   text (7 paragraphs spread across 13 chapters); real generated
+   books will have real chapter boundaries. */
+
+const PROGRESS_KEY = "ydb-progress";
+
+function getProgress(bookId) {
+  try {
+    const all = JSON.parse(localStorage.getItem(PROGRESS_KEY) || "{}") || {};
+    const p = all[bookId];
+    if (!p || typeof p !== "object") return null;
+    return {
+      chapter: typeof p.chapter === "number" ? p.chapter : 1,
+      paragraph: typeof p.paragraph === "number" ? p.paragraph : null,
+      timeSec: typeof p.timeSec === "number" ? p.timeSec : null
+    };
+  } catch (e) { return null; }
+}
+
+// Merge a partial position into the saved one (missing fields keep
+// their previous values).
+function saveProgress(bookId, patch) {
+  if (!bookId) return;
+  let all = {};
+  try { all = JSON.parse(localStorage.getItem(PROGRESS_KEY) || "{}") || {}; } catch (e) { all = {}; }
+  all[bookId] = Object.assign({}, all[bookId] || {}, patch);
+  try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(all)); } catch (e) { /* storage unavailable */ }
+}
+
+// Placeholder mapping between reader paragraphs and chapters:
+// the demo text has totalParas paragraphs spread across 13 chapters.
+function chapterForParagraph(paraIdx, totalParas) {
+  if (!totalParas || totalParas <= 0) return 1;
+  return Math.min(CHAPTER_COUNT, Math.floor(paraIdx / totalParas * CHAPTER_COUNT) + 1);
+}
+function paragraphForChapter(chapter, totalParas) {
+  if (!totalParas || totalParas <= 0) return 0;
+  return Math.min(totalParas - 1, Math.ceil((chapter - 1) / CHAPTER_COUNT * totalParas));
+}
+
+// Save the reading position: the paragraph the user has reached.
+// The chapter and the audio timestamp follow from it (start of that
+// chapter), so the saved position stays one coherent spot.
+function saveReadingProgress(book, paragraphIdx) {
+  if (!book) return;
+  const total = bookFullText(book).length;
+  const para = Math.max(0, Math.min(paragraphIdx, total - 1));
+  const chapter = chapterForParagraph(para, total);
+  saveProgress(book.id, {
+    chapter: chapter,
+    paragraph: para,
+    timeSec: chapterStartSecondsFor(book, chapter - 1)
+  });
+}
+
+// Save the listening position: the current chapter + audio timestamp.
+// The paragraph follows from the chapter, so the reader can resume
+// at the same spot.
+function saveAudioProgress() {
+  if (!player.current) return;
+  const book = player.current;
+  const total = bookFullText(book).length;
+  const chapter = currentChapterIndex() + 1;
+  saveProgress(book.id, {
+    chapter: chapter,
+    paragraph: paragraphForChapter(chapter, total),
+    timeSec: Math.floor(player.position)
+  });
+}
+
+// "Continue" — resume a book from the saved position: open the reader
+// at the saved chapter/paragraph and load the player at the saved
+// timestamp (no autoplay — the user presses play to resume listening).
+// With no saved position yet, it starts at the beginning.
+function continueBook(book, voice) {
+  if (!book) return;
+  openReader(book);
+  loadBook(book, voice || "Warm", false);
 }
 
 $("#spiceFilter").addEventListener("change", e => {
@@ -578,13 +820,28 @@ function currentChapterIndex() {
 }
 
 function chapterStartSeconds(idx) {
-  if (!player.current) return 0;
-  return chapterDurations(player.current).slice(0, idx).reduce((a, b) => a + b, 0);
+  return chapterStartSecondsFor(player.current, idx);
+}
+
+// Chapter start (seconds) for a given book — chapterStartSeconds is
+// the same thing for the book currently in the player.
+function chapterStartSecondsFor(book, idx) {
+  if (!book) return 0;
+  return chapterDurations(book).slice(0, idx).reduce((a, b) => a + b, 0);
 }
 
 function loadBook(book, voice, autoplay) {
   player.current = book;
-  player.position = 0;
+  // Resume from the saved listening position (if any) — do not restart
+  // from 0. Clamped to the book length and, for visitors, to the
+  // 90-second preview limit.
+  const prog = getProgress(book.id);
+  const limit = previewLimitSecs();
+  player.position = (prog && typeof prog.timeSec === "number")
+    ? Math.max(0, Math.min(prog.timeSec, book.secs, limit))
+    : 0;
+  _lastAudioSaveSec = -1;
+  markCurrentlyReading(book);
   player.voice = voice || player.voice;
   $("#playerCover").className = "player-cover " + book.grad;
   $("#playerCover").textContent = book.title.split(" ").map(w => w[0]).slice(0, 2).join("");
@@ -640,16 +897,31 @@ function setPlaying(playing) {
     if (!player.timer) {
       player.timer = setInterval(tick, 250);
     }
-  } else if (player.timer) {
-    clearInterval(player.timer);
-    player.timer = null;
+  } else {
+    // Pausing saves the listening position, so "Continue" resumes here.
+    saveAudioProgress();
+    if (player.timer) {
+      clearInterval(player.timer);
+      player.timer = null;
+    }
   }
   updatePlayerUI();
 }
 
+// Last whole second the listening position was saved at (tick saves
+// at most once per second so localStorage is not written every tick).
+let _lastAudioSaveSec = -1;
+
 function tick() {
   if (!player.playing || !player.current) return;
   player.position += 0.25 * player.speed;
+  // Save the listening position as audio plays (once per whole
+  // second) so "Continue" always reflects the latest spot.
+  const sec = Math.floor(player.position);
+  if (sec !== _lastAudioSaveSec) {
+    _lastAudioSaveSec = sec;
+    saveAudioProgress();
+  }
   // Visitor audio preview: stop at the preview limit and open the gate.
   if (player.position >= previewLimitSecs()) {
     player.position = previewLimitSecs();
@@ -731,6 +1003,7 @@ function renderChapterList() {
       return;
     }
     player.position = chapterStartSeconds(idx);
+    saveAudioProgress();
     updatePlayerUI();
     renderChapterList();
   }));
@@ -742,12 +1015,14 @@ $("#prevChapterBtn").addEventListener("click", () => {
   if (!player.current) return;
   const cur = currentChapterIndex();
   player.position = chapterStartSeconds(Math.max(0, cur - 1));
+  saveAudioProgress();
   updatePlayerUI();
 });
 $("#nextChapterBtn").addEventListener("click", () => {
   if (!player.current) return;
   const cur = currentChapterIndex();
   player.position = chapterStartSeconds(Math.min(CHAPTER_COUNT - 1, cur + 1));
+  saveAudioProgress();
   updatePlayerUI();
 });
 $("#speedSelect").addEventListener("change", e => { player.speed = parseFloat(e.target.value); });
@@ -775,13 +1050,15 @@ $("#progressTrack").addEventListener("click", e => {
     return;
   }
   player.position = target;
+  saveAudioProgress();
   updatePlayerUI();
 });
 $("#progressTrack").addEventListener("keydown", e => {
   if (!player.current) return;
-  if (e.key === "ArrowLeft") { player.position = Math.max(0, player.position - 10); updatePlayerUI(); }
+  if (e.key === "ArrowLeft") { player.position = Math.max(0, player.position - 10); saveAudioProgress(); updatePlayerUI(); }
   if (e.key === "ArrowRight") {
     player.position = Math.min(player.current.secs, player.position + 10, previewLimitSecs());
+    saveAudioProgress();
     updatePlayerUI();
   }
 });
@@ -803,13 +1080,47 @@ setInterval(() => { if (player.sleepMins > 0) updateSleepBtn(); }, 15000);
    - Signed-in user: the full story text + full audio playback. */
 
 let readerBook = null;
+// The saved reading position for the book currently in the reader:
+// { paragraph, chapter } — or null when starting at the beginning.
+let readerResume = null;
+// Timestamp of the last openReader (the programmatic scroll to the
+// saved position must not be mistaken for the user reading).
+let _readerOpenedAt = 0;
+// Last paragraph the scroll tracker saved (so it only saves on change).
+let _lastReadPara = -1;
+
+// The reader position to resume from, if the user left off past the
+// beginning: { paragraph, chapter }. Null when there is no saved
+// position or the saved position is the beginning.
+function resumeParagraphFor(book, paras) {
+  if (!book || !paras) return null;
+  const prog = getProgress(book.id);
+  if (!prog) return null;
+  let para = null;
+  if (typeof prog.paragraph === "number") para = prog.paragraph;
+  else if (prog.chapter > 1) para = paragraphForChapter(prog.chapter, paras.length);
+  if (para === null) return null;
+  para = Math.max(0, Math.min(para, paras.length - 1));
+  if (para <= 0) return null;
+  return { paragraph: para, chapter: prog.chapter || chapterForParagraph(para, paras.length) };
+}
 
 function openReader(book) {
   readerBook = book;
+  markCurrentlyReading(book);
   document.body.classList.add("reading");
   $("#bookView").classList.remove("hidden");
+  _readerOpenedAt = Date.now();
+  _lastReadPara = -1;
   renderReader();
-  window.scrollTo(0, 0);
+  // Jump to the saved reading position (if any); otherwise start at the top.
+  if (readerResume) {
+    const el = document.getElementById("reader-p-" + readerResume.paragraph);
+    if (el && el.scrollIntoView) el.scrollIntoView({ block: "start" });
+    else window.scrollTo(0, 0);
+  } else {
+    window.scrollTo(0, 0);
+  }
 }
 
 function closeReader() {
@@ -825,6 +1136,19 @@ function renderReader() {
   const book = readerBook;
   if (!book) { wrap.innerHTML = ""; return; }
   const voice = player.current && player.current.id === book.id ? player.voice : "Warm";
+  // The paragraphs shown here, and where the user left off in them.
+  const paras = isSignedIn() ? bookFullText(book) : bookPreviewText(book);
+  const resume = resumeParagraphFor(book, paras);
+  readerResume = resume;
+  const resumeBanner = resume
+    ? '<p class="resume-banner">▶ Continue from Chapter ' + resume.chapter + ' <span class="small muted">— you left off at paragraph ' + (resume.paragraph + 1) + " of " + paras.length + "</span></p>"
+    : "";
+  // Every paragraph gets an id so the scroll tracker can tell how far
+  // the user has read, and the resume paragraph is marked so the
+  // reader can jump straight to it.
+  const readerTextHTML = '<div class="reader-text">' + paras.map((p, i) =>
+    '<p id="reader-p-' + i + '"' + (resume && i === resume.paragraph ? ' class="resume-target"' : "") + ">" + escapeHtml(p) + "</p>"
+  ).join("") + "</div>";
   const coverHTML = `
       <div class="reader-cover ${book.grad}">
         <span class="cover-genre">${escapeHtml(book.genre)} · New today</span>
@@ -842,7 +1166,6 @@ function renderReader() {
         </label>`;
 
   if (isSignedIn()) {
-    const paras = bookFullText(book);
     wrap.innerHTML = `
     <article class="reader">
       ${coverHTML}
@@ -851,7 +1174,8 @@ function renderReader() {
         <button class="btn btn-primary" id="readerListenBtn" type="button">▶ Listen to the Full Story</button>
         ${voiceHTML}
       </div>
-      <div class="reader-text">${paras.map(p => "<p>" + escapeHtml(p) + "</p>").join("")}</div>
+      ${resumeBanner}
+      ${readerTextHTML}
       <p class="small muted">(Placeholder text — the real generated book replaces this at launch.)</p>
     </article>`;
     $("#readerListenBtn").addEventListener("click", () => {
@@ -860,7 +1184,6 @@ function renderReader() {
     });
     $("#readerVoiceSelect").addEventListener("change", e => setVoice(e.target.value));
   } else {
-    const paras = bookPreviewText(book);
     wrap.innerHTML = `
     <article class="reader">
       ${coverHTML}
@@ -870,7 +1193,8 @@ function renderReader() {
         ${voiceHTML}
       </div>
       <p class="preview-label">Preview — the first pages</p>
-      <div class="reader-text">${paras.map(p => "<p>" + escapeHtml(p) + "</p>").join("")}</div>
+      ${resumeBanner}
+      ${readerTextHTML}
       <p class="preview-end">— Preview ends here —</p>
       <div class="gate-box">
         <h3>Keep reading ${escapeHtml(book.title)}?</h3>
@@ -892,6 +1216,29 @@ function renderReader() {
     $("#readerVoiceSelect").addEventListener("change", e => setVoice(e.target.value));
   }
 }
+
+// Track how far the user has read: as the reader scrolls, save the
+// furthest paragraph reached (only when it changes, so the saved
+// position always reflects the latest spot). The programmatic scroll
+// to the saved position when the reader opens is ignored (800ms
+// window), so opening a book never overwrites its saved position.
+function onReaderScroll() {
+  if (!readerBook) return;
+  if (Date.now() - _readerOpenedAt < 800) return;
+  const paras = $$('[id^="reader-p-"]');
+  if (!paras.length) return;
+  const mid = (typeof window !== "undefined" && window.innerHeight) ? window.innerHeight / 2 : 0;
+  let current = 0;
+  paras.forEach((el, i) => {
+    const rect = el.getBoundingClientRect ? el.getBoundingClientRect() : null;
+    if (rect && rect.top <= mid) current = i;
+  });
+  if (current !== _lastReadPara) {
+    _lastReadPara = current;
+    saveReadingProgress(readerBook, current);
+  }
+}
+document.addEventListener("scroll", onReaderScroll);
 
 /* ---------- Made For You form ---------- */
 

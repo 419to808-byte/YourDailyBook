@@ -75,6 +75,22 @@
     <span class="small muted" id="bookCount"></span>
   </div>
   <p class="small muted" id="catalogAgeNote"></p>
+
+  <!-- ================= Currently Reading ================= -->
+  <!-- Books the user opened (Read or Listen), most recent first.
+       Shown only when it has books; hidden when empty. Each card has
+       a ▶ Continue button that resumes the book from its saved
+       position, and an ✕ Remove button that takes it out of this
+       section only — never out of the catalog. Persists in
+       localStorage, and respects the age filter like the catalog. -->
+  <section class="currently-reading hidden" id="currentlyReading" aria-label="Currently Reading">
+    <div class="cr-head">
+      <h2>Currently Reading</h2>
+      <p class="small muted">Pick up where you left off — most recent first.</p>
+    </div>
+    <div class="book-grid cr-grid" id="currentlyReadingGrid"></div>
+  </section>
+
   <div class="book-grid" id="bookGrid"></div>
   <p class="small muted mt-3">Catalog books are fiction only, tagged by spice level, and go through a human quality check before they publish. See our <a href="policies.html#community-guidelines">Community Guidelines</a>.</p>
 
