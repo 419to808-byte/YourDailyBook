@@ -241,8 +241,9 @@ function signIn(name, dob) {
     name: (name || "Reader").trim() || "Reader",
     dob: dob || null,
     isAdult: isAdult,
-    writeMode: isAdult ? "adult" : "child"
+    writeMode: "child"
   };
+  applyWriteModeFromDob(); // mode comes from the birthday, never from a user flip
   persistAuth();
   updateAuthUI();
   updateWriteModeUI();
@@ -281,34 +282,40 @@ function updateAuthUI() {
 }
 
 /* ---------- Child / adult mode (Write Your Own) ---------- */
-/* The toggle is tied to the account age (date of birth at sign-up).
-   - Visitor (not signed in): child mode, locked — age can't be verified.
-   - Child account (under 18): child mode, locked — cannot switch to adult.
-   - Adult account: starts in adult mode, can switch to child freely
-     (e.g., making a book for a child) and back.
+/* The switch is controlled by the company, not the user — it is set
+   by the birthday entered at sign-up (TY Nov 5 ~10:38 PM).
+   - Birthday under 18 → the child side is turned on (child mode).
+   - Birthday 18+ → adult access is granted (adult mode).
+   - Visitor (not signed in): child mode — age can't be verified.
+   The user does NOT flip the switch themselves. The mode is derived
+   from the account's date of birth only (signIn sets it from the
+   DOB; the demo log-in has no DOB on file, so it signs in as adult).
+   There is no UI control that lets a signed-in user change their
+   own mode — the switch in Write Your Own is a locked display
+   indicator, not a control.
    Child mode generates age-appropriate books only (no sexual content,
    no adult themes). Adult mode is unchained. The minors hard stop —
    no sexual content involving minors, ever — applies in BOTH modes. */
 
 function writeMode() { return auth.writeMode || "child"; }
-function canSwitchWriteMode() { return isAdultUser(); }
 
-function setWriteMode(mode) {
-  if (mode === "adult" && !canSwitchWriteMode()) return false;
-  auth.writeMode = mode;
-  persistAuth();
-  updateWriteModeUI();
-  return true;
+// Internal only: derive the mode from the account age (date of
+// birth). Called from signIn — never from a UI control.
+function applyWriteModeFromDob() {
+  auth.writeMode = auth.isAdult ? "adult" : "child";
 }
 
 function updateWriteModeUI() {
+  // The switch is a display indicator, not a control: it shows the
+  // mode set by the birthday on the account. Both buttons are always
+  // disabled — the user cannot change their own mode.
   const mode = writeMode();
-  const locked = !canSwitchWriteMode();
   const childBtn = $("#modeChildBtn");
   const adultBtn = $("#modeAdultBtn");
   childBtn.classList.toggle("active", mode === "child");
   adultBtn.classList.toggle("active", mode === "adult");
-  adultBtn.disabled = locked;
+  childBtn.disabled = true;
+  adultBtn.disabled = true;
   const badge = $("#writeModeBadge");
   badge.textContent = mode === "child" ? "Child mode" : "Adult mode";
   badge.className = "badge " + (mode === "child" ? "badge-child" : "badge-adult");
@@ -316,10 +323,10 @@ function updateWriteModeUI() {
     ? "Child mode — the AI writes age-appropriate books only: no sexual content, no adult themes. The questions and guidance are written for young writers."
     : "Adult mode — unchained: no holds, no blocks, no spice cap. The writer has full creative freedom.";
   $("#writeModeLock").textContent = !isSignedIn()
-    ? "You're browsing as a visitor, so Child mode is on — we can't verify age without an account. Sign in with an adult account to switch to Adult mode."
+    ? "You're browsing as a visitor, so Child mode is on — we can't verify age without an account. Your mode is set by the birthday on your account once you sign up."
     : (!isAdultUser()
-      ? "This account is under 18, so Child mode is locked on. It can't be switched to Adult mode."
-      : "You can switch modes anytime — use Child mode when making a book for a child.");
+      ? "This account's birthday is under 18, so Child mode is set for this account. The switch is controlled by us — it can't be changed here."
+      : "Your mode is set by the birthday on your account — adult access is granted. The switch is controlled by us, based on your birthday.");
   $("#writeFlowMode").textContent = mode === "child"
     ? "Mode: Child — age-appropriate. Your book will contain no sexual content and no adult themes."
     : "Mode: Adult — unchained. No holds, no blocks, no spice cap. (No sexual content involving minors, ever.)";
@@ -456,6 +463,11 @@ function filteredBooks() {
   );
 }
 
+/* Book cards, post-style (TY Nov 5 ~10:43 PM): each card reads like a
+   post — a slim gradient band, a title header, a meta line (genre,
+   spice, chapter count, length), the opening text, and the Listen /
+   Read actions with the voice picker. Written from scratch for
+   YourDailyBook; no code copied from any other project. */
 function renderBooks() {
   const grid = $("#bookGrid");
   const list = filteredBooks();
@@ -475,18 +487,19 @@ function renderBooks() {
           <span class="cover-genre">${escapeHtml(b.genre)}</span>
           <span class="badge badge-ai">AI-Generated</span>
         </div>
-        <div class="cover-title">${escapeHtml(b.title)}</div>
       </div>
       <div class="book-body">
-        <p class="book-desc">${escapeHtml(b.desc)}</p>
-        <p class="preview-label">Preview — the first pages</p>
-        <p class="preview-snippet">${escapeHtml(preview)}</p>
-        <div class="book-meta">
-          <span>⏱ ${b.dur}</span>
+        <h3 class="book-title">${escapeHtml(b.title)}</h3>
+        <p class="book-meta">
+          <span>${escapeHtml(b.genre)}</span>
           <span>📖 13 chapters</span>
+          <span>⏱ ${b.dur}</span>
           <span class="badge badge-spice">Spice ${b.spice}</span>
           <span class="badge badge-new">New today</span>
-        </div>
+        </p>
+        <p class="book-desc">${escapeHtml(b.desc)}</p>
+        <p class="preview-label">The opening pages</p>
+        <p class="preview-snippet">${escapeHtml(preview)}</p>
         <div class="book-actions">
           <button class="btn btn-primary btn-sm play-book" type="button" data-book-id="${b.id}">${signedIn ? "▶ Listen" : "▶ Preview"}</button>
           <button class="btn btn-ghost btn-sm read-book" type="button" data-book-id="${b.id}">${signedIn ? "Read full story" : "Read preview"}</button>
@@ -958,10 +971,11 @@ $("#wfQuestionsBtn").addEventListener("click", buildQuestions);
 $("#wfFinishBtn").addEventListener("click", () => showWriteStep(4));
 $("#wfRestartBtn").addEventListener("click", () => showWriteStep(1));
 
-// Child / adult mode toggle (Write Your Own). The Adult button is
-// disabled for visitors and child accounts — see updateWriteModeUI.
-$("#modeChildBtn").addEventListener("click", () => setWriteMode("child"));
-$("#modeAdultBtn").addEventListener("click", () => setWriteMode("adult"));
+// Child / adult mode switch (Write Your Own) — display only. The
+// switch is set by the birthday on the account (see
+// applyWriteModeFromDob); there is no UI control that lets a user
+// change their own mode, so these buttons have no click handlers
+// and are always disabled (see updateWriteModeUI).
 
 /* ---------- Modals: sign up, log in ---------- */
 
@@ -1029,6 +1043,10 @@ $("#loginForm").addEventListener("submit", e => {
 /* ---------- Init ---------- */
 
 (function init() {
+  // Defaults (TY Nov 5 ~10:43 PM): the site opens on Daily Books
+  // (the first main tab) with genre "All" — the landing shows the
+  // breadth of the catalog. activeGenre already defaults to "All".
+  switchTab("daily");
   updateAuthUI(); // restore the signed-in header for returning demo users
   // Fill voice selects (player + Made For You form + Write Your Own genre select).
   $("#playerVoiceSelect").innerHTML = voiceOptionsHTML("Warm");
