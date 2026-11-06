@@ -25,6 +25,7 @@
     </nav>
     <div class="header-actions">
       <span class="auth-greeting hidden" id="authGreeting"></span>
+      <a class="btn btn-ghost btn-sm hidden" id="settingsLink" href="account.html">Settings</a>
       <button class="btn btn-ghost btn-sm hidden" id="signoutBtn" type="button">Sign Out</button>
       <button class="btn btn-ghost btn-sm" id="loginBtn" type="button">Log In</button>
       <button class="btn btn-primary btn-sm" id="signupBtn" type="button">Sign Up</button>
@@ -114,6 +115,7 @@
     <div class="card">
       <h3>Tell us about you</h3>
       <p class="muted small">Your details are used <strong>only</strong> to generate your book. They are never sold, never shared with advertisers, and never used to train AI. You can change or delete them anytime.</p>
+      <p class="small muted hidden" id="pfSavedNote">These are your saved details — <a href="account.html">change them in Settings</a>.</p>
       <form id="personalizeForm">
         <div class="form-field">
           <label for="pfName">Your name</label>
@@ -430,57 +432,6 @@
   <ol class="chapter-list" id="chapterList" style="list-style:none;"></ol>
 </div>
 
-<!-- ================= Sign up modal ================= -->
-<div class="modal-backdrop" id="signupModal" role="dialog" aria-modal="true" aria-labelledby="signupTitle">
-  <div class="modal">
-    <button class="modal-close" data-close-modal="signupModal" type="button" aria-label="Close">✕</button>
-    <div id="signupFormWrap">
-      <h2 id="signupTitle">Create your account</h2>
-      <p class="muted" id="signupContext">Join YourDailyBook. Your first book is waiting.</p>
-      <form id="signupForm">
-        <div class="form-field">
-          <label for="suPlan">Plan</label>
-          <select id="suPlan">
-            <option value="listener">Listener — $9.99/month</option>
-            <option value="author">Author — $24.99/month</option>
-          </select>
-        </div>
-        <div class="form-field">
-          <label for="suName">Your name</label>
-          <input type="text" id="suName" placeholder="Your name" required>
-        </div>
-        <div class="form-field">
-          <label for="suEmail">Email</label>
-          <input type="email" id="suEmail" placeholder="you@example.com" required>
-        </div>
-        <div class="form-field">
-          <label for="suDob">Date of birth</label>
-          <input type="date" id="suDob" required>
-          <div class="hint">Your date of birth sets your content mode — under 18 gets child-safe content only. A parent or guardian manages payment for accounts under 18.</div>
-        </div>
-        <div class="form-field">
-          <label style="display:flex; gap:8px; align-items:flex-start; font-weight:400;">
-            <input type="checkbox" id="suAge" style="width:auto; margin-top:4px;" required>
-            <span>I've read the <a href="policies.html" target="_blank">Policies</a> and agree to the Terms of Service. (For accounts under 18, a parent or guardian agrees.)</span>
-          </label>
-        </div>
-        <div class="callout mb-2">
-          <p><strong>About the upfront fee.</strong> When you sign up, we immediately do the pre-render work — caching the tone, tempo, and emotion directions and rendering the launch catalog in the narrator voices. That work happens the moment signup completes, so the one-time upfront fee ($[amount], to be set) is <strong>non-refundable once signup is complete</strong>. Payment is handled securely by Stripe — we never see or store your card number.</p>
-        </div>
-        <button class="btn btn-primary btn-block" type="submit">Create Account</button>
-        <p class="fine-print mt-2">By signing up you agree to the Terms of Service and Privacy Policy. Cancel anytime from your account page.</p>
-      </form>
-    </div>
-    <div id="signupSuccess" class="form-success" hidden>
-      <div class="big-check">✓</div>
-      <h2 id="signupSuccessTitle">Welcome to YourDailyBook!</h2>
-      <p class="muted" id="signupSuccessText">You're signed in. The full story is unlocked — go read it.</p>
-      <p class="small muted">Demo sign-in: no account or payment was created yet. Real checkout opens at launch.</p>
-      <button class="btn btn-primary" data-close-modal="signupModal" type="button">Start Reading</button>
-    </div>
-  </div>
-</div>
-
 <!-- ================= Age lock message ================= -->
 <div class="modal-backdrop" id="ageLockModal" role="dialog" aria-modal="true" aria-labelledby="ageLockTitle">
   <div class="modal">
@@ -488,27 +439,6 @@
     <h2 id="ageLockTitle">🔒 This book is locked for now</h2>
     <p class="muted" id="ageLockText"></p>
     <button class="btn btn-primary" data-close-modal="ageLockModal" type="button">Got it</button>
-  </div>
-</div>
-
-<!-- ================= Log in modal ================= -->
-<div class="modal-backdrop" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
-  <div class="modal">
-    <button class="modal-close" data-close-modal="loginModal" type="button" aria-label="Close">✕</button>
-    <h2 id="loginTitle">Welcome back</h2>
-    <p class="muted">Log in to pick up your books right where you left off.</p>
-    <form id="loginForm">
-      <div class="form-field">
-        <label for="liEmail">Email</label>
-        <input type="email" id="liEmail" placeholder="you@example.com" required>
-      </div>
-      <div class="form-field">
-        <label for="liPass">Password</label>
-        <input type="password" id="liPass" placeholder="Your password" required>
-      </div>
-      <button class="btn btn-primary btn-block" type="submit">Log In</button>
-      <p class="fine-print mt-2">Demo sign-in — any email and password works, and it signs you in for this session so you can try the full book. Real accounts open at launch. Questions? <a href="mailto:support@yourdailybook.com">support@yourdailybook.com</a></p>
-    </form>
   </div>
 </div>
 

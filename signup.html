@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Up — YourDailyBook</title>
+<meta name="description" content="Create your YourDailyBook account — and tell us about yourself, so your weekly personalized book is written just for you.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-auth-page="signup">
+
+<!-- ================= Header ================= -->
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="index.html">
+      <span class="logo-mark" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      </span>
+      <span>YourDailyBook<small>AI Audiobooks</small></span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">☰</button>
+    <nav class="main-nav" id="mainNav" aria-label="Main navigation">
+      <a href="index.html#pricing">Pricing</a>
+      <a href="policies.html">Policies</a>
+    </nav>
+    <div class="header-actions">
+      <span class="auth-greeting hidden" id="authGreeting"></span>
+      <a class="btn btn-ghost btn-sm hidden" id="settingsLink" href="account.html">Settings</a>
+      <button class="btn btn-ghost btn-sm hidden" id="signoutBtn" type="button">Sign Out</button>
+      <button class="btn btn-ghost btn-sm" id="loginBtn" type="button">Log In</button>
+    </div>
+  </div>
+</header>
+
+<main>
+<div class="wrap auth-wrap">
+
+  <!-- Already signed in -->
+  <div id="authAlready" class="card hidden">
+    <div class="form-success">
+      <div class="big-check">✓</div>
+      <h2 id="authAlreadyTitle">You're already signed in.</h2>
+      <p class="muted" id="authAlreadyText"></p>
+      <p>
+        <a class="btn btn-primary" href="index.html">Start Reading</a>
+        <a class="btn btn-ghost" href="account.html">Go to Settings</a>
+      </p>
+      <p><button class="btn btn-ghost btn-sm" id="authAlreadySignout" type="button">Sign Out</button></p>
+    </div>
+  </div>
+
+  <div id="authMain">
+    <div class="section-head">
+      <span class="eyebrow">YourDailyBook</span>
+      <h2 id="authTitle">Create your account</h2>
+      <p class="muted" id="authContext">Join YourDailyBook. Your first book is waiting.</p>
+    </div>
+
+    <!-- Create account / Log in toggle -->
+    <div class="auth-toggle" role="tablist" aria-label="Sign up or log in">
+      <button type="button" class="auth-toggle-btn active" id="modeSignupBtn" role="tab" aria-selected="true">Create account</button>
+      <button type="button" class="auth-toggle-btn" id="modeLoginBtn" role="tab" aria-selected="false">Log in</button>
+    </div>
+
+    <!-- Prototype switcher — sign-up flow only. One will be picked for launch. -->
+    <div class="card proto-switcher" id="protoSwitcher">
+      <p class="small" style="margin:0;"><strong>Prototype — try both signup flows, one will be picked for launch:</strong></p>
+      <div class="proto-btns">
+        <button type="button" class="btn btn-primary btn-sm" id="protoOneBtn">One page</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="protoStepsBtn">Step by step</button>
+      </div>
+      <p class="small muted" style="margin:0;">Switching keeps everything you've typed.</p>
+    </div>
+
+    <!-- ============ VARIANT 1: ONE PAGE (default) ============ -->
+    <form id="onePageForm" class="card auth-form" novalidate>
+      <h3>Your account</h3>
+      <div class="form-field">
+        <label for="opPlan">Plan</label>
+        <select id="opPlan">
+          <option value="listener">Listener — $9.99/month</option>
+          <option value="author">Author — $24.99/month</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label for="opName">Your name</label>
+        <input type="text" id="opName" placeholder="Your name" required autocomplete="name">
+      </div>
+      <div class="form-field">
+        <label for="opEmail">Email</label>
+        <input type="email" id="opEmail" placeholder="you@example.com" required autocomplete="email">
+      </div>
+      <div class="form-field">
+        <label for="opPass">Password</label>
+        <input type="password" id="opPass" placeholder="At least 8 characters" required minlength="8" autocomplete="new-password">
+      </div>
+      <div class="form-field">
+        <label for="opDob">Date of birth</label>
+        <input type="date" id="opDob" required autocomplete="bday">
+        <div class="hint">Your date of birth sets your content mode — under 18 gets child-safe content only. A parent or guardian manages payment for accounts under 18.</div>
+      </div>
+
+      <h3 class="mt-3">Your weekly book</h3>
+      <p class="muted small">Once a week, a short story is written just for you — built from these details. It's your story, about you, in the genres and content ratings you choose.</p>
+      <div class="form-field">
+        <label for="opAbout">A short description of yourself</label>
+        <textarea id="opAbout" placeholder="A few sentences — what you love, where you're from, what kind of hero you want to be…"></textarea>
+        <div class="hint">This is what the story is built from. Keep it as short or as detailed as you like.</div>
+      </div>
+      <div class="form-field">
+        <label>Favorite genres <span class="hint">(pick up to 3)</span></label>
+        <div class="check-row" id="opGenres"></div>
+      </div>
+      <div class="form-field">
+        <label>Ratings for your weekly book <span class="hint">(pick any that fit you)</span></label>
+        <div class="check-row" id="opRatings"></div>
+        <div class="hint" id="opRatingsHint"></div>
+      </div>
+      <div class="form-field">
+        <label for="opVoice">Your narrator voice</label>
+        <select id="opVoice"></select>
+        <div class="hint">You can switch voices anytime — even mid-sentence — without losing your place.</div>
+      </div>
+
+      <div class="form-field">
+        <label style="display:flex; gap:8px; align-items:flex-start; font-weight:400;">
+          <input type="checkbox" id="opTerms" style="width:auto; margin-top:4px;" required>
+          <span>I've read the <a href="policies.html" target="_blank">Policies</a> and agree to the Terms of Service. (For accounts under 18, a parent or guardian agrees.)</span>
+        </label>
+      </div>
+      <div class="callout mb-2">
+        <p><strong>About the upfront fee.</strong> When you sign up, we immediately do the pre-render work — caching the tone, tempo, and emotion directions and rendering the launch catalog in the narrator voices. That work happens the moment signup completes, so the one-time upfront fee ($[amount], to be set) is <strong>non-refundable once signup is complete</strong>. Payment is handled securely by Stripe — we never see or store your card number.</p>
+      </div>
+      <p class="form-error hidden" id="opError" role="alert"></p>
+      <button class="btn btn-primary btn-block" type="submit">Create Account</button>
+      <p class="fine-print mt-2">By signing up you agree to the Terms of Service and Privacy Policy. Cancel anytime from your account page.</p>
+    </form>
+
+    <!-- ============ VARIANT 2: STEP BY STEP ============ -->
+    <form id="stepsForm" class="card auth-form hidden" novalidate>
+      <ol class="steps-indicator">
+        <li data-step="1" class="active"><span class="step-num">1</span> Your account</li>
+        <li data-step="2"><span class="step-num">2</span> Your weekly book</li>
+        <li data-step="3"><span class="step-num">3</span> Review &amp; create</li>
+      </ol>
+
+      <!-- Step 1: Your account -->
+      <div id="stStep1">
+        <h3>Your account</h3>
+        <div class="form-field">
+          <label for="st1Plan">Plan</label>
+          <select id="st1Plan">
+            <option value="listener">Listener — $9.99/month</option>
+            <option value="author">Author — $24.99/month</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="st1Name">Your name</label>
+          <input type="text" id="st1Name" placeholder="Your name" required autocomplete="name">
+        </div>
+        <div class="form-field">
+          <label for="st1Email">Email</label>
+          <input type="email" id="st1Email" placeholder="you@example.com" required autocomplete="email">
+        </div>
+        <div class="form-field">
+          <label for="st1Pass">Password</label>
+          <input type="password" id="st1Pass" placeholder="At least 8 characters" required minlength="8" autocomplete="new-password">
+        </div>
+        <div class="form-field">
+          <label for="st1Dob">Date of birth</label>
+          <input type="date" id="st1Dob" required autocomplete="bday">
+          <div class="hint">Your date of birth sets your content mode — under 18 gets child-safe content only. A parent or guardian manages payment for accounts under 18.</div>
+        </div>
+        <p class="form-error hidden" id="stStep1Error" role="alert"></p>
+        <button class="btn btn-primary btn-block" id="stNext1" type="button">Next: Your weekly book →</button>
+      </div>
+
+      <!-- Step 2: Your weekly book -->
+      <div id="stStep2" class="hidden">
+        <h3>Your weekly book</h3>
+        <p class="muted small">Once a week, a short story is written just for you — built from these details. It's your story, about you, in the genres and content ratings you choose.</p>
+        <div class="form-field">
+          <label for="st2About">A short description of yourself</label>
+          <textarea id="st2About" placeholder="A few sentences — what you love, where you're from, what kind of hero you want to be…"></textarea>
+          <div class="hint">This is what the story is built from. Keep it as short or as detailed as you like.</div>
+        </div>
+        <div class="form-field">
+          <label>Favorite genres <span class="hint">(pick up to 3)</span></label>
+          <div class="check-row" id="st2Genres"></div>
+        </div>
+        <div class="form-field">
+          <label>Ratings for your weekly book <span class="hint">(pick any that fit you)</span></label>
+          <div class="check-row" id="st2Ratings"></div>
+          <div class="hint" id="st2RatingsHint"></div>
+        </div>
+        <div class="form-field">
+          <label for="st2Voice">Your narrator voice</label>
+          <select id="st2Voice"></select>
+          <div class="hint">You can switch voices anytime — even mid-sentence — without losing your place.</div>
+        </div>
+        <div class="step-nav">
+          <button class="btn btn-ghost" id="stBack2" type="button">← Back</button>
+          <button class="btn btn-primary" id="stNext2" type="button">Next: Review →</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Review & create -->
+      <div id="stStep3" class="hidden">
+        <h3>Review &amp; create</h3>
+        <p class="muted small">Check everything below. You can go back and change any of it — and you can change these details anytime later in Settings.</p>
+        <div class="review-list" id="st3Review"></div>
+        <div class="form-field mt-2">
+          <label style="display:flex; gap:8px; align-items:flex-start; font-weight:400;">
+            <input type="checkbox" id="st3Terms" style="width:auto; margin-top:4px;" required>
+            <span>I've read the <a href="policies.html" target="_blank">Policies</a> and agree to the Terms of Service. (For accounts under 18, a parent or guardian agrees.)</span>
+          </label>
+        </div>
+        <div class="callout mb-2">
+          <p><strong>About the upfront fee.</strong> When you sign up, we immediately do the pre-render work — caching the tone, tempo, and emotion directions and rendering the launch catalog in the narrator voices. That work happens the moment signup completes, so the one-time upfront fee ($[amount], to be set) is <strong>non-refundable once signup is complete</strong>. Payment is handled securely by Stripe — we never see or store your card number.</p>
+        </div>
+        <p class="form-error hidden" id="stStep3Error" role="alert"></p>
+        <div class="step-nav">
+          <button class="btn btn-ghost" id="stBack3" type="button">← Back</button>
+          <button class="btn btn-primary" type="submit">Create Account</button>
+        </div>
+        <p class="fine-print mt-2">By signing up you agree to the Terms of Service and Privacy Policy. Cancel anytime from your account page.</p>
+      </div>
+    </form>
+
+    <!-- ============ LOG IN ============ -->
+    <form id="loginFormPage" class="card auth-form hidden" novalidate>
+      <h3>Welcome back</h3>
+      <p class="muted">Log in to pick up your books right where you left off.</p>
+      <div class="form-field">
+        <label for="lgEmail">Email</label>
+        <input type="email" id="lgEmail" placeholder="you@example.com" required autocomplete="email">
+      </div>
+      <div class="form-field">
+        <label for="lgPass">Password</label>
+        <input type="password" id="lgPass" placeholder="Your password" required autocomplete="current-password">
+      </div>
+      <p class="form-error hidden" id="lgError" role="alert"></p>
+      <button class="btn btn-primary btn-block" type="submit">Log In</button>
+      <p class="fine-print mt-2">Demo sign-in — any email and password works, and it signs you in for this session so you can try the full book. Real accounts open at launch. Questions? <a href="mailto:support@yourdailybook.com">support@yourdailybook.com</a></p>
+      <p class="small">New here? <button type="button" class="link-btn" id="switchToSignup">Create an account</button></p>
+    </form>
+
+    <!-- ============ SUCCESS ============ -->
+    <div id="authSuccess" class="card form-success hidden">
+      <div class="big-check">✓</div>
+      <h2 id="authSuccessTitle">Welcome to YourDailyBook!</h2>
+      <p class="muted" id="authSuccessText">Your first weekly book is on its way — almost instant.</p>
+      <p class="small muted">Demo sign-in: no account or payment was created yet. Real checkout opens at launch.</p>
+      <p>
+        <a class="btn btn-primary" href="index.html">Start Reading</a>
+        <a class="btn btn-ghost" href="account.html">Go to Settings</a>
+      </p>
+    </div>
+  </div>
+</div>
+</main>
+
+<!-- ================= Footer ================= -->
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-bottom">
+      <span>© 2026 YourDailyBook. All rights reserved.</span>
+      <span>Every book on YourDailyBook is AI-generated — written by AI, read by AI.</span>
+      <span><a href="mailto:support@yourdailybook.com">support@yourdailybook.com</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="auth.js"></script>
+</body>
+</html>

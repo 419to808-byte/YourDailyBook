@@ -296,6 +296,7 @@ function signIn(name, dob) {
   updateWriteModeUI();
   renderRatingFilter();
   renderPfRatings();
+  prefillPersonalizeForm(); // fill the Made For You form from the saved profile
   if (readerBook) renderReader();
   renderChapterList();
   renderBooks();
@@ -313,6 +314,7 @@ function signOut() {
   updateWriteModeUI();
   renderRatingFilter();
   renderPfRatings();
+  prefillPersonalizeForm(); // back to the plain preview form
   if (readerBook) renderReader();
   renderChapterList();
   renderBooks();
@@ -323,6 +325,8 @@ function updateAuthUI() {
   $("#loginBtn").classList.toggle("hidden", signedIn);
   $("#signupBtn").classList.toggle("hidden", signedIn);
   $("#signoutBtn").classList.toggle("hidden", !signedIn);
+  const settingsLink = $("#settingsLink");
+  if (settingsLink) settingsLink.classList.toggle("hidden", !signedIn);
   const greet = $("#authGreeting");
   greet.classList.toggle("hidden", !signedIn);
   if (signedIn) greet.textContent = "Hi, " + auth.name;
@@ -457,6 +461,40 @@ function drawPersonalizedRating() {
     ? checked
     : allowedRatings().filter(r => r !== "R");
   return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// Made For You pre-fill (v7): if signed in and a weekly-book
+// profile was saved at sign-up (localStorage "ydb-profile"), fill
+// the form from it and point at Settings for changes. Visitors (or
+// no profile) keep the plain preview form. A saved rating is only
+// ever applied where the reader's age allows it — a signed-in
+// under-13 user never sees Rated R checked.
+function prefillPersonalizeForm() {
+  const note = $("#pfSavedNote");
+  let profile = null;
+  try { profile = JSON.parse(localStorage.getItem("ydb-profile") || "null"); } catch (e) { profile = null; }
+  if (!isSignedIn() || !profile) {
+    // Visitor (or signed in with no saved profile): plain preview
+    // form, defaults re-applied by renderPfRatings.
+    if (note) note.classList.add("hidden");
+    pfRatingsTouched = false;
+    renderPfRatings();
+    return;
+  }
+  // The saved ratings are the user's choices — don't let
+  // renderPfRatings re-apply the defaults over them.
+  pfRatingsTouched = true;
+  $("#pfName").value = auth.name || "";
+  $("#pfAbout").value = profile.about || "";
+  $$("#pfGenres input[type=checkbox]").forEach(cb => {
+    cb.checked = (profile.genres || []).indexOf(cb.value) >= 0;
+  });
+  Object.keys(PF_RATING_BOXES).forEach(rating => {
+    const box = document.getElementById(PF_RATING_BOXES[rating]);
+    if (box && !box.disabled) box.checked = (profile.ratings || []).indexOf(rating) >= 0;
+  });
+  if (profile.voice) $("#pfVoice").value = profile.voice;
+  if (note) note.classList.remove("hidden");
 }
 
 function updateCatalogNote() {
@@ -1349,7 +1387,7 @@ function renderReader() {
     const gateContext = "You picked “" + book.title + "”. Sign up to read the full story — and listen to the full audiobook.";
     $("#gateReadBtn").addEventListener("click", () => openSignup(gateContext));
     $("#gateListenBtn").addEventListener("click", () => openSignup(gateContext));
-    $("#gateLoginBtn").addEventListener("click", () => openModal("loginModal"));
+    $("#gateLoginBtn").addEventListener("click", () => { window.location.href = "signup.html?mode=login"; });
     $("#readerListenPreviewBtn").addEventListener("click", () => {
       loadBook(book, $("#readerVoiceSelect").value, true);
       document.getElementById("player").scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -1474,59 +1512,30 @@ $$(".modal-backdrop").forEach(bd => bd.addEventListener("click", e => {
   if (e.target === bd) bd.classList.remove("open");
 }));
 
-// Sign up / log in — DEMO sign-in: no backend yet. Signing up or
-// logging in sets the simulated signed-in state (localStorage) so
-// the preview gate can be tested. Real accounts + Stripe at launch.
+// Sign up / log in — DEMO sign-in: no backend yet. v7: sign-up and
+// log-in live on their own page (signup.html), so these entry points
+// navigate there instead of opening the old modal. The old modal
+// markup stays in index.html dormant; nothing opens it anymore.
+// The context (which book or gate sent the user here) is kept in
+// sessionStorage so the sign-up page can show it.
 function openSignup(context) {
-  $("#signupContext").textContent = context || "Join YourDailyBook. Your first book is waiting.";
-  // Reset the modal to the form (a previous sign-up may have left the success view showing).
-  $("#signupFormWrap").hidden = false;
-  $("#signupSuccess").hidden = true;
-  openModal("signupModal");
+  try {
+    if (context) sessionStorage.setItem("ydb-signup-context", context);
+  } catch (e) { /* storage unavailable — navigate without the context */ }
+  window.location.href = "signup.html";
 }
 
-$("#signupBtn").addEventListener("click", () => openSignup());
-$("#loginBtn").addEventListener("click", () => openModal("loginModal"));
+$("#signupBtn").addEventListener("click", () => { window.location.href = "signup.html"; });
+$("#loginBtn").addEventListener("click", () => { window.location.href = "signup.html?mode=login"; });
 $("#signoutBtn").addEventListener("click", signOut);
 $$("[data-plan]").forEach(btn => btn.addEventListener("click", () => {
   const plan = btn.dataset.plan;
-  $("#suPlan").value = plan;
-  openSignup(plan === "author"
-    ? "You picked the Author plan ($24.99/month) — daily books, your weekly book, plus a Write Your Own book every month."
-    : "You picked the Listener plan ($9.99/month) — a new book in every genre, every day, plus your weekly personalized book.");
+  window.location.href = "signup.html?plan=" + plan;
 }));
 
-$("#signupForm").addEventListener("submit", e => {
-  e.preventDefault();
-  const dobValue = $("#suDob").value;
-  const dob = new Date(dobValue);
-  if (isNaN(dob.getTime())) { alert("Please enter your date of birth."); return; }
-  if (!$("#suAge").checked) {
-    alert("Please agree to the Terms of Service.");
-    return;
-  }
-  // PLACEHOLDER: no account/billing backend yet. Demo sign-in only.
-  // The date of birth sets the account's content mode: under 18
-  // signs in as a child account (child-safe content, locked to
-  // Child mode); 18+ signs in as an adult.
-  signIn($("#suName").value.trim(), dobValue);
-  $("#signupSuccessTitle").textContent = "Welcome to YourDailyBook, " + auth.name + "!";
-  $("#signupSuccessText").textContent = auth.isAdult
-    ? "You're signed in. The full story is unlocked — go read it."
-    : "You're signed in in Child mode — age-appropriate books only. A parent or guardian manages payment for your account.";
-  $("#signupFormWrap").hidden = true;
-  $("#signupSuccess").hidden = false;
-});
-
-$("#loginForm").addEventListener("submit", e => {
-  e.preventDefault();
-  // PLACEHOLDER: demo sign-in — any email/password works. The name
-  // is taken from the email address. Real accounts open at launch.
-  const email = $("#liEmail").value.trim();
-  const name = email.split("@")[0].replace(/[._\-+]+/g, " ").replace(/\b\w/g, c => c.toUpperCase()) || "Reader";
-  signIn(name);
-  closeModal("loginModal");
-});
+/* NOTE: the old sign-up / log-in modals were removed in v7 — sign-up
+   and log-in live on signup.html now. The age-lock modal below is
+   the only modal left on this page. */
 
 /* ---------- Init ---------- */
 
@@ -1544,6 +1553,7 @@ $("#loginForm").addEventListener("submit", e => {
   renderGenrePills();
   renderRatingFilter(); // age-capped rating choices for the catalog
   renderPfRatings();     // age-capped rating choices for Made For You
+  prefillPersonalizeForm(); // saved weekly-book details, if signed in
   // Once the user touches a rating checkbox, their choices are theirs
   // — renderPfRatings stops re-applying the defaults (see the
   // pfRatingsTouched flag). Availability (disabled) is still enforced.

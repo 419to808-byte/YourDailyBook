@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings — YourDailyBook</title>
+<meta name="description" content="Your YourDailyBook settings — your weekly book details, your account, and your data.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-auth-page="account">
+
+<!-- ================= Header ================= -->
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="index.html">
+      <span class="logo-mark" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      </span>
+      <span>YourDailyBook<small>AI Audiobooks</small></span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">☰</button>
+    <nav class="main-nav" id="mainNav" aria-label="Main navigation">
+      <a href="index.html#pricing">Pricing</a>
+      <a href="policies.html">Policies</a>
+    </nav>
+    <div class="header-actions">
+      <span class="auth-greeting hidden" id="authGreeting"></span>
+      <a class="btn btn-ghost btn-sm hidden" id="settingsLink" href="account.html">Settings</a>
+      <button class="btn btn-ghost btn-sm hidden" id="signoutBtn" type="button">Sign Out</button>
+      <button class="btn btn-ghost btn-sm" id="loginBtn" type="button">Log In</button>
+    </div>
+  </div>
+</header>
+
+<main>
+<div class="wrap auth-wrap">
+
+  <!-- Not signed in -->
+  <div id="acctLoggedOut" class="card hidden">
+    <div class="form-success">
+      <h2>Log in to see your account</h2>
+      <p class="muted">Your settings live behind your account — your weekly book details, your plan, and your data.</p>
+      <p><a class="btn btn-primary" href="signup.html?mode=login">Log In</a>
+      <a class="btn btn-ghost" href="signup.html">Create an Account</a></p>
+    </div>
+  </div>
+
+  <div id="acctMain" class="hidden">
+    <div class="section-head">
+      <span class="eyebrow">YourDailyBook</span>
+      <h2>Settings</h2>
+      <p class="muted"><span id="acctGreeting">Hi there</span> — everything about your account lives here.</p>
+    </div>
+
+    <!-- Section 1: Your weekly book -->
+    <section class="card auth-form" aria-label="Your weekly book">
+      <h3>Your weekly book</h3>
+      <p class="muted small">The details your weekly personalized story is written from — the same ones you put in at signup.</p>
+      <div class="form-field">
+        <label for="acAbout">A short description of yourself</label>
+        <textarea id="acAbout" placeholder="A few sentences — what you love, where you're from, what kind of hero you want to be…"></textarea>
+      </div>
+      <div class="form-field">
+        <label>Favorite genres <span class="hint">(pick up to 3)</span></label>
+        <div class="check-row" id="acGenres"></div>
+      </div>
+      <div class="form-field">
+        <label>Ratings for your weekly book <span class="hint">(pick any that fit you)</span></label>
+        <div class="check-row" id="acRatings"></div>
+        <div class="hint" id="acRatingsHint"></div>
+      </div>
+      <div class="form-field">
+        <label for="acVoice">Your narrator voice</label>
+        <select id="acVoice"></select>
+      </div>
+      <p class="small muted">Changes apply to your next weekly book, not the one you're currently reading.</p>
+      <p class="form-ok hidden" id="acBookMsg" role="status"></p>
+      <button class="btn btn-primary" id="acSaveBookBtn" type="button">Save Weekly Book Details</button>
+    </section>
+
+    <!-- Section 2: Account -->
+    <section class="card auth-form mt-3" aria-label="Account">
+      <h3>Account</h3>
+      <div class="form-field">
+        <label for="acName">Your name</label>
+        <input type="text" id="acName" placeholder="Your name" autocomplete="name">
+      </div>
+      <div class="form-field">
+        <label for="acEmail">Email</label>
+        <input type="email" id="acEmail" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="form-field">
+        <label for="acPlan">Plan</label>
+        <select id="acPlan">
+          <option value="listener">Listener — $9.99/month</option>
+          <option value="author">Author — $24.99/month</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label for="acNewPass">New password</label>
+        <input type="password" id="acNewPass" placeholder="Leave blank to keep your current password" minlength="8" autocomplete="new-password">
+        <div class="hint">Demo: sign-in doesn't check passwords yet, so a new password isn't stored as a credential — you'll set a real one when real accounts open at launch.</div>
+      </div>
+      <p class="small muted" id="acDobNote"></p>
+      <p class="form-error hidden" id="acAccountMsg" role="alert"></p>
+      <button class="btn btn-primary" id="acSaveAccountBtn" type="button">Save Account</button>
+      <p class="mt-2"><button class="btn btn-ghost btn-sm" id="acctSignoutBtn" type="button">Sign Out</button></p>
+    </section>
+
+    <!-- Section 3: Privacy & data -->
+    <section class="card auth-form mt-3" aria-label="Privacy and data">
+      <h3>Privacy &amp; data</h3>
+      <p class="muted small">Your details are used <strong>only</strong> to generate your book. They are never sold, never shared with advertisers, and never used to train AI. You can delete them anytime here.</p>
+      <div class="form-field">
+        <button class="btn btn-ghost" id="acDelDetailsBtn" type="button">Delete my personal details</button>
+        <div class="hint">Clears the about-you text, genres, ratings, and voice saved for your weekly book. Your account stays signed in.</div>
+      </div>
+      <div class="form-field">
+        <button class="btn btn-ghost danger-btn" id="acDelAccountBtn" type="button">Delete my account</button>
+        <div class="hint">Deletes your whole account and your personal details. Once deleted it cannot be restored — you'd need to sign up again as a new user.</div>
+      </div>
+      <p class="form-ok hidden" id="acDeleteMsg" role="status"></p>
+      <p class="fine-print">Demo: this clears the data stored in this browser only. At launch, account deletion is completed within 30 days of your request, and you'll get a confirmation email. Stripe payment records and books you've bought the license to are not deleted — see <a href="policies.html#data-deletion">Data Deletion</a>.</p>
+    </section>
+  </div>
+</div>
+</main>
+
+<!-- ================= Footer ================= -->
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-bottom">
+      <span>© 2026 YourDailyBook. All rights reserved.</span>
+      <span>Every book on YourDailyBook is AI-generated — written by AI, read by AI.</span>
+      <span><a href="mailto:support@yourdailybook.com">support@yourdailybook.com</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="auth.js"></script>
+</body>
+</html>

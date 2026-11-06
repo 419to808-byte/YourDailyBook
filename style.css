@@ -436,6 +436,63 @@ textarea { min-height: 90px; resize: vertical; }
   display: inline-flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 12px;
 }
 
+/* ---------------- Auth pages (signup.html / account.html) ---------------- */
+/* Standalone pages — no sticky player, so the bottom padding for it
+   is dropped on these pages. */
+body[data-auth-page] { padding-bottom: 24px; }
+.auth-wrap { max-width: 680px; padding-top: 36px; padding-bottom: 36px; }
+.auth-wrap .section-head { margin-bottom: 20px; }
+.auth-toggle { display: flex; gap: 8px; margin-bottom: 20px; }
+.auth-toggle-btn {
+  flex: 1; font-family: var(--font-sans); font-size: 1rem; font-weight: 700;
+  padding: 12px 16px; border-radius: 999px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink-soft); cursor: pointer;
+}
+.auth-toggle-btn:hover { border-color: var(--accent); color: var(--accent-dark); }
+.auth-toggle-btn.active { background: var(--accent); border-color: var(--accent); color: var(--navy); }
+/* Prototype switcher — the two signup flows, one page. Clearly
+   labeled as a prototype so it never ships as-is. */
+.proto-switcher { margin-bottom: 20px; padding: 18px 20px; }
+.proto-btns { display: flex; gap: 8px; margin: 10px 0 8px; flex-wrap: wrap; }
+.auth-form { margin-bottom: 0; }
+.auth-form h3 { font-size: 1.35rem; }
+.auth-form h3.mt-3 { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--line); }
+.form-error { color: var(--danger); font-size: 0.92rem; font-weight: 600; margin: 0 0 12px; }
+.form-ok { color: var(--ok); font-size: 0.92rem; font-weight: 600; margin: 0 0 12px; }
+/* Step-by-step progress indicator. */
+.steps-indicator {
+  list-style: none; padding: 0; margin: 0 0 24px;
+  display: flex; gap: 8px;
+}
+.steps-indicator li {
+  flex: 1; display: flex; align-items: center; gap: 8px;
+  font-size: 0.85rem; font-weight: 700; color: var(--ink-faint);
+  padding: 10px 8px; border-radius: var(--radius-sm); background: var(--paper-2);
+}
+.steps-indicator li .step-num {
+  flex: none; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--line); color: var(--ink-soft);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-sans); font-weight: 700; font-size: 0.85rem;
+}
+.steps-indicator li.active { color: var(--navy); background: var(--accent-soft); }
+.steps-indicator li.active .step-num { background: var(--accent); color: var(--navy); }
+.steps-indicator li.done { color: var(--ok); }
+.steps-indicator li.done .step-num { background: var(--ok); color: #fff; }
+.step-nav { display: flex; gap: 10px; justify-content: space-between; margin-top: 8px; }
+.step-nav .btn { flex: 1; }
+/* Review summary on Step 3 — label/value rows. */
+.review-list { border: 1px solid var(--line); border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 16px; }
+.review-row {
+  display: flex; gap: 16px; padding: 10px 14px; font-size: 0.95rem;
+  border-bottom: 1px solid var(--line);
+}
+.review-row:last-child { border-bottom: none; }
+.review-row span:first-child { font-weight: 700; color: var(--ink-soft); width: 150px; flex: none; }
+.review-row span:last-child { word-break: break-word; }
+.danger-btn { color: var(--danger); border-color: #fecaca; }
+.danger-btn:hover { background: #fef2f2; border-color: var(--danger); }
+
 /* ---------------- Misc ---------------- */
 .q-list { display: grid; gap: 14px; margin: 16px 0; }
 .q-item label { display: block; font-weight: 700; font-size: 0.92rem; margin-bottom: 4px; }
