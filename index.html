@@ -39,6 +39,7 @@
   <div class="wrap">
     <div class="tabs" role="tablist" aria-label="Main sections">
       <button class="tab-btn active" role="tab" data-tab="daily" aria-selected="true" type="button"><span class="tab-title">Daily Books</span><span class="tab-sub">A new book in every genre, every day</span></button>
+      <button class="tab-btn" role="tab" data-tab="continue" aria-selected="false" type="button"><span class="tab-title">Continue Reading</span><span class="tab-sub">Pick up where you left off</span></button>
       <button class="tab-btn" role="tab" data-tab="made" aria-selected="false" type="button"><span class="tab-title">Made For You</span><span class="tab-sub">One personal story, every week</span></button>
       <button class="tab-btn" role="tab" data-tab="write" aria-selected="false" type="button"><span class="tab-title">Write Your Own</span><span class="tab-sub">Turn your idea into a book you can sell</span></button>
     </div>
@@ -46,9 +47,10 @@
 </div>
 
 <!-- ================= Tagline (two lines under the tabs) ================= -->
-<!-- The one line that explains the whole site, and it maps directly to the
-     three tabs (daily book / made for you weekly / make your own). Kept at
-     the top so a first-time visitor understands the site at a glance. -->
+<!-- The one line that explains the whole site, and it maps directly to
+     the tabs (daily book / continue reading / made for you weekly /
+     make your own). Kept at the top so a first-time visitor understands
+     the site at a glance. -->
 <div class="tagline-strip">
   <div class="wrap">
     <h1>A new audiobook every day, <em>one made just for you</em> every week —<br>and when you're ready, <em>make your own.</em></h1>
@@ -76,21 +78,6 @@
   </div>
   <p class="small muted" id="catalogAgeNote"></p>
 
-  <!-- ================= Currently Reading ================= -->
-  <!-- Books the user opened (Read or Listen), most recent first.
-       Shown only when it has books; hidden when empty. Each card has
-       a ▶ Continue button that resumes the book from its saved
-       position, and an ✕ Remove button that takes it out of this
-       section only — never out of the catalog. Persists in
-       localStorage, and respects the age filter like the catalog. -->
-  <section class="currently-reading hidden" id="currentlyReading" aria-label="Currently Reading">
-    <div class="cr-head">
-      <h2>Currently Reading</h2>
-      <p class="small muted">Pick up where you left off — most recent first.</p>
-    </div>
-    <div class="book-grid cr-grid" id="currentlyReadingGrid"></div>
-  </section>
-
   <div class="book-grid" id="bookGrid"></div>
   <p class="small muted mt-3">Catalog books are fiction only, tagged by content rating (PG, PG-13, or Rated R), and go through a human quality check before they publish. See our <a href="policies.html#community-guidelines">Community Guidelines</a>.</p>
 
@@ -101,6 +88,30 @@
   <section class="closing-value" aria-label="About YourDailyBook">
     <span class="eyebrow">Audiobook-first · All genres · For all ages</span>
     <p>Every book is written by AI and read by an AI voice — and we say so openly. Listener $9.99/mo · Author $24.99/mo · Cancel anytime.</p>
+  </section>
+</section>
+
+<!-- ===== Continue Reading panel ===== -->
+<!-- Books the user opened (Read, Listen, or Preview), most recent
+     first. Each card has a ▶ Continue button that resumes the book
+     from its saved position, and an ✕ Remove button that takes it
+     out of this section only — never out of the catalog. Persists in
+     localStorage, and respects the age filter like the catalog.
+     When empty, the tab shows a friendly empty state instead of
+     hiding — a first-time visitor should see where their books will
+     wait for them. -->
+<section class="tab-panel" id="panel-continue" role="tabpanel" aria-label="Continue Reading">
+  <div class="section-head">
+    <span class="eyebrow">Continue Reading</span>
+    <h2>Pick up where you left off</h2>
+    <p>Every book you open waits for you here — right where you left off.</p>
+  </div>
+  <section class="currently-reading" id="currentlyReading" aria-label="Currently Reading">
+    <div class="book-grid cr-grid" id="currentlyReadingGrid"></div>
+    <div class="empty-state hidden" id="currentlyReadingEmpty">
+      <h3>Nothing here yet</h3>
+      <p>Preview a book and it'll wait for you here, right where you left off.</p>
+    </div>
   </section>
 </section>
 
@@ -368,6 +379,7 @@
         <h4>Product</h4>
         <ul>
           <li><a href="#tabs" data-nav-tab="daily">Daily Books</a></li>
+          <li><a href="#tabs" data-nav-tab="continue">Continue Reading</a></li>
           <li><a href="#tabs" data-nav-tab="made">Made For You</a></li>
           <li><a href="#tabs" data-nav-tab="write">Write Your Own</a></li>
           <li><a href="#pricing">Pricing</a></li>

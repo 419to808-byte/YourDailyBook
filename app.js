@@ -653,7 +653,13 @@ function dailyShuffle(list, dateKey) {
    opts.continuable adds a "▶ Continue" button (Currently Reading
    only) that resumes the book from its saved position. */
 function bookCardHTML(book, opts) {
-  const preview = bookPreviewText(book)[0];
+  const previewParas = bookPreviewText(book);
+  const preview = previewParas[0];
+  // The rest of the teaser (the second preview paragraph) lives on
+  // the card too, hidden until the preview plays in place — then the
+  // card expands to show the teaser words right where they are.
+  const previewExtra = previewParas.slice(1).map(p =>
+    '<p class="preview-snippet preview-extra">' + escapeHtml(p) + '</p>').join("");
   const signedIn = isSignedIn();
   const locked = isBookLocked(book);
   const removeBtn = (opts && opts.removable)
@@ -685,6 +691,7 @@ function bookCardHTML(book, opts) {
         <p class="book-desc">${escapeHtml(book.desc)}</p>
         <p class="preview-label">The opening pages</p>
         <p class="preview-snippet">${escapeHtml(preview)}</p>
+        ${previewExtra}
         <div class="book-actions">
           ${continueBtn}
           <button class="btn btn-primary btn-sm play-book" type="button" data-book-id="${book.id}">${signedIn ? "▶ Listen" : "▶ Preview"}</button>
@@ -696,6 +703,19 @@ function bookCardHTML(book, opts) {
         </div>
       </div>
     </article>`;
+}
+
+// The teaser words, expanded in place on the card while its preview
+// plays. The Preview button only starts playback — it never opens
+// the reader — so the words the audio is reading have to be visible
+// right here on the screen. A book can appear in two grids at once
+// (catalog + Continue Reading), so every card for it expands.
+function showPreviewTeaser(bookId) {
+  $$(".book-card").forEach(card =>
+    card.classList.toggle("teaser-open", card.dataset.bookId === bookId));
+}
+function hidePreviewTeaser() {
+  $$(".book-card.teaser-open").forEach(card => card.classList.remove("teaser-open"));
 }
 
 // A visitor asking for the WHOLE story — clicking the card itself
@@ -710,13 +730,14 @@ function goToSignupForBook(book) {
 }
 
 // Wire the buttons/selects inside a rendered book grid (catalog or
-// Currently Reading). For a signed-in reader, clicking a card,
+// Continue Reading). For a signed-in reader, clicking a card,
 // "▶ Listen", or "Read full story" opens the reader/player. For a
-// visitor, "▶ Preview" opens the reader teaser (2 paragraphs +
-// 90s audio, then the gate), while clicking the card itself or
-// "Read full story" goes straight to the sign-up page — the whole
+// visitor, "▶ Preview" plays the preview IN PLACE — it loads the
+// book into the sticky player (90 seconds, then the gate) and stays
+// on the page, never opening the reader; clicking the card itself
+// or "Read full story" goes straight to the sign-up page — the whole
 // story is what sign-up is for. Voice selects switch the voice,
-// and ✕ Remove takes a book out of Currently Reading only.
+// and ✕ Remove takes a book out of Continue Reading only.
 function wireBookGrid(grid) {
   // Clicking the card itself (not a button/select): signed-in opens
   // the reader; a visitor goes straight to the sign-up page.
@@ -736,7 +757,18 @@ function wireBookGrid(grid) {
   $$(".play-book", grid).forEach(btn => btn.addEventListener("click", () => {
     const book = BOOKS.find(x => x.id === btn.dataset.bookId);
     const voiceSel = grid.querySelector('[data-book-voice="' + book.id + '"]');
-    if (openReader(book)) loadBook(book, voiceSel ? voiceSel.value : "Warm", true);
+    const voice = voiceSel ? voiceSel.value : "Warm";
+    // Signed-in "▶ Listen": the full book page (reader) + full audio.
+    if (isSignedIn()) {
+      if (openReader(book)) loadBook(book, voice, true);
+      return;
+    }
+    // Visitor "▶ Preview": no navigation, no reader. The preview
+    // plays in the sticky player right here on the page, and the
+    // teaser words expand in place on the card. loadBook itself
+    // checks the lock (age message, never the book) and caps the
+    // preview at 90 seconds; the gate at the end is unchanged.
+    if (loadBook(book, voice, true)) showPreviewTeaser(book.id);
   }));
   $$("[data-book-voice]", grid).forEach(sel => sel.addEventListener("change", () => {
     const book = BOOKS.find(x => x.id === sel.dataset.bookVoice);
@@ -772,9 +804,12 @@ function renderBooks() {
 /* TY Nov 5 ~11:08 PM: any book the user opens (Read or Listen —
    opening the reader or starting the player) goes into Currently
    Reading, most recent first; opening it again moves it back to the
-   top. The section lives on the Daily Books tab above the book grid
-   and is hidden when empty. Each book has an ✕ Remove button that
-   takes it out of this section only — never out of the catalog.
+   top. Since Nov 6 v9 the section lives on its OWN tab — "Continue
+   Reading", second in the tab row — not on Daily Books. When the
+   list is empty the tab shows a friendly empty state instead of
+   hiding, so a first-time visitor sees where their books will wait
+   for them. Each book has an ✕ Remove button that takes it out of
+   this section only — never out of the catalog.
    The list persists in localStorage (demo; real backend storage at
    launch) and respects the age filter, like the catalog.
    The MOST IMPORTANT part is picking up where you left off (TY Nov 5
@@ -822,15 +857,17 @@ function currentlyReadingBooks() {
 }
 
 function renderCurrentlyReading() {
-  const section = $("#currentlyReading");
   const grid = $("#currentlyReadingGrid");
+  const empty = $("#currentlyReadingEmpty");
   const list = currentlyReadingBooks();
+  // Empty: the tab stays, and the empty state says where books will
+  // wait. Never hide the section — the tab is the home for it.
   if (list.length === 0) {
-    section.classList.add("hidden");
     grid.innerHTML = "";
+    if (empty) empty.classList.remove("hidden");
     return;
   }
-  section.classList.remove("hidden");
+  if (empty) empty.classList.add("hidden");
   grid.innerHTML = list.map(b => bookCardHTML(b, { removable: true, continuable: true })).join("");
   wireBookGrid(grid);
 }
@@ -1006,6 +1043,7 @@ function loadBook(book, voice, autoplay) {
 
 // A visitor hit the end of the audio preview: stop and open the gate.
 function previewGateReached() {
+  hidePreviewTeaser();
   if (player.current) {
     openSignup("You reached the end of the preview of “" + player.current.title + "”. Sign up to hear the rest — and every book, every day.");
   } else {

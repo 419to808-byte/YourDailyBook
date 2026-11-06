@@ -533,6 +533,14 @@ body.reading main > :not(#bookView) { display: none !important; }
   font-size: 0.92rem; color: var(--ink-soft); font-style: italic; margin: 0;
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
 }
+/* The rest of the teaser on a card: hidden until the preview plays in
+   place, then the card expands to show the teaser words right where
+   they are (no reader, no new page). The second paragraph is shown
+   whole — no clamp — once the card is open. */
+.preview-extra { display: none; }
+.book-card.teaser-open .preview-extra {
+  display: block; -webkit-line-clamp: unset; margin-top: 0.75rem;
+}
 .preview-end { text-align: center; color: var(--ink-faint); font-size: 0.9rem; margin: 8px 0 24px; }
 /* Resume banner + target paragraph — shown when the reader opens a
    book the user left partway through. */
