@@ -128,11 +128,27 @@ img { max-width: 100%; }
 .btn-block { width: 100%; }
 .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
-/* ---------------- Hero (compact — the main tabs below are the dominant top element) ---------------- */
-.hero { padding: 28px 0 6px; }
-.hero h1 { font-size: 1.6rem; line-height: 1.25; max-width: 880px; }
-.hero h1 em { font-style: normal; color: var(--accent-dark); }
-.hero-sub { font-size: 1rem; color: var(--ink-soft); max-width: 720px; margin-top: 8px; }
+/* ---------------- Tagline (two lines under the main tabs) ---------------- */
+/* The one line that explains the whole site, and it maps directly to the
+   three tabs (daily / weekly personal / make your own). It renders as TWO
+   lines with a deliberate break at the em dash — line 1 is the consumption
+   promise, line 2 lands on "make your own" as the differentiator. A single
+   slim block under the tabs, not a hero block, so the tabs stay the highest
+   and dominant element. */
+.tagline-strip { padding: 16px 0 2px; }
+.tagline-strip h1 { font-size: 1.2rem; line-height: 1.4; font-weight: 600; text-align: center; max-width: 880px; margin: 0 auto; }
+.tagline-strip h1 em { font-style: normal; color: var(--accent-dark); }
+
+/* ---------------- Closing value-prop (below the book grid) ---------------- */
+/* The positioning line + AI disclosure + pricing, moved here from the top so
+   the tabs sit higher. Reads as the pitch + disclosure strip at the bottom
+   of the Daily Books view. */
+.closing-value {
+  background: var(--accent-soft); border: 1px solid #bae6fd;
+  border-radius: var(--radius); padding: 28px 24px; text-align: center;
+  margin-top: 28px;
+}
+.closing-value p { color: var(--ink-soft); font-size: 1rem; margin: 0 auto; max-width: 680px; }
 
 /* Cover gradients (CSS only — no images). Cool tones only:
    baby blue, pale blue, sky blue, teal, soft cool grays. */
@@ -417,7 +433,7 @@ textarea { min-height: 90px; resize: vertical; }
 
 /* ---------------- Responsive ---------------- */
 @media (max-width: 900px) {
-  .hero h1 { font-size: 1.45rem; }
+  .tagline-strip h1 { font-size: 1.1rem; }
   .book-grid { grid-template-columns: repeat(2, 1fr); }
   .split { grid-template-columns: 1fr; }
   .price-grid { grid-template-columns: 1fr; }
@@ -440,8 +456,8 @@ textarea { min-height: 90px; resize: vertical; }
   .book-grid { grid-template-columns: 1fr; }
   .policy-grid { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr; }
-  .hero { padding: 20px 0 4px; }
-  .hero h1 { font-size: 1.3rem; }
+  .tagline-strip { padding: 12px 0 2px; }
+  .tagline-strip h1 { font-size: 1.05rem; }
   .section { padding: 44px 0; }
   /* Main tabs stay big and dominant on small screens — stacked full-width. */
   .tabs { flex-direction: column; }

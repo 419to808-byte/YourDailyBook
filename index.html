@@ -33,16 +33,7 @@
 </header>
 
 <main>
-<!-- ================= Hero (compact — the tabs below are the main event) ================= -->
-<section class="hero">
-  <div class="wrap">
-    <span class="eyebrow">Audiobook-first · All genres · For all ages</span>
-    <h1>A new audiobook every day, <em>one made just for you</em> every week — and when you're ready, <em>make your own.</em></h1>
-    <p class="hero-sub">Every book is written by AI and read by an AI voice — and we say so openly. Listener $9.99/mo · Author $24.99/mo · Cancel anytime.</p>
-  </div>
-</section>
-
-<!-- ================= Tabs (the dominant top element) ================= -->
+<!-- ================= Tabs (the dominant top element — first big thing under the header) ================= -->
 <div class="tabs-bar" id="tabs">
   <div class="wrap">
     <div class="tabs" role="tablist" aria-label="Main sections">
@@ -50,6 +41,16 @@
       <button class="tab-btn" role="tab" data-tab="made" aria-selected="false" type="button"><span class="tab-title">Made For You</span><span class="tab-sub">One personal story, every week</span></button>
       <button class="tab-btn" role="tab" data-tab="write" aria-selected="false" type="button"><span class="tab-title">Write Your Own</span><span class="tab-sub">Turn your idea into a book you can sell</span></button>
     </div>
+  </div>
+</div>
+
+<!-- ================= Tagline (two lines under the tabs) ================= -->
+<!-- The one line that explains the whole site, and it maps directly to the
+     three tabs (daily book / made for you weekly / make your own). Kept at
+     the top so a first-time visitor understands the site at a glance. -->
+<div class="tagline-strip">
+  <div class="wrap">
+    <h1>A new audiobook every day, <em>one made just for you</em> every week —<br>and when you're ready, <em>make your own.</em></h1>
   </div>
 </div>
 
@@ -76,6 +77,15 @@
   <p class="small muted" id="catalogAgeNote"></p>
   <div class="book-grid" id="bookGrid"></div>
   <p class="small muted mt-3">Catalog books are fiction only, tagged by spice level, and go through a human quality check before they publish. See our <a href="policies.html#community-guidelines">Community Guidelines</a>.</p>
+
+  <!-- ================= Closing value-prop (below the book grid) ================= -->
+  <!-- The positioning line + AI disclosure + pricing, moved here from the top
+       so the main tabs sit higher. Reads as the pitch + disclosure strip at
+       the bottom of the Daily Books view. -->
+  <section class="closing-value" aria-label="About YourDailyBook">
+    <span class="eyebrow">Audiobook-first · All genres · For all ages</span>
+    <p>Every book is written by AI and read by an AI voice — and we say so openly. Listener $9.99/mo · Author $24.99/mo · Cancel anytime.</p>
+  </section>
 </section>
 
 <!-- ===== Made For You panel ===== -->
