@@ -195,7 +195,10 @@ img { max-width: 100%; }
 
 /* Genre pills — wrap onto as many lines as needed so every genre is
    shown; no horizontal scroll on any screen (TY Nov 6: no scrollbar
-   on genres). Applies to the Daily Books row and the browse row. */
+   on genres). Applies to the Daily Books row and the browse row.
+   TY Nov 6: on laptop widths (≥1200px) all 11 pills fit on ONE line —
+   tighter gap/padding + slightly smaller type so they fit the 1080px
+   row with room to spare; below that they wrap as before. */
 .genre-row {
   display: flex; gap: 8px; flex-wrap: wrap;
   margin: 0 0 20px;
@@ -207,6 +210,12 @@ img { max-width: 100%; }
 }
 .genre-pill:hover { border-color: var(--accent); color: var(--accent-dark); }
 .genre-pill.active { background: var(--accent); border-color: var(--accent); color: var(--navy); }
+/* One-line fit on laptop widths — placed AFTER the base .genre-pill
+   rules so it wins the cascade (same specificity, later in file). */
+@media (min-width: 1200px) {
+  .genre-row { flex-wrap: nowrap; gap: 6px; }
+  .genre-pill { font-size: 0.85rem; padding: 7px 10px; }
+}
 .filter-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
 .filter-row label { font-size: 0.9rem; font-weight: 600; color: var(--ink-soft); }
 select, input[type="text"], input[type="email"], input[type="password"], input[type="date"], input[type="search"], textarea {
