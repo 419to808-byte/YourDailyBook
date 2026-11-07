@@ -220,8 +220,9 @@ textarea { min-height: 90px; resize: vertical; }
 /* ---------------- Book cards (post-style: header + meta + body + actions) ---------------- */
 /* Written from scratch for YourDailyBook. Each card reads like a
    post: a slim gradient band on top, then a title header, a meta
-   line (genre, rating, chapters, length), the opening text, and the
-   Listen / Read actions with the voice picker. */
+   block with genre, read time, and chapters + badges on three
+   separate fixed lines, the opening text, and the Listen / Read
+   actions with the voice picker. */
 .book-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .book-card {
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
@@ -237,7 +238,13 @@ textarea { min-height: 90px; resize: vertical; }
 .book-cover .cover-genre { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.9; }
 .book-body { padding: 18px 18px 18px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
 .book-title { font-family: var(--font-serif); font-size: 1.35rem; line-height: 1.2; margin: 0; }
-.book-meta { display: flex; gap: 12px; flex-wrap: wrap; font-size: 0.85rem; color: var(--ink-soft); }
+.book-meta { display: flex; flex-direction: column; gap: 2px; font-size: 0.85rem; color: var(--ink-soft); }
+/* TY Nov 6 ~10:19 PM: genre and time of read sit on separate fixed
+   lines on every platform — line 1 is the genre, line 2 is the read
+   time, line 3 is chapters + badges. The meta never flows them onto
+   one wrapping line, so the card layout is identical on desktop and
+   mobile. */
+.book-meta .meta-line { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .book-meta span { display: inline-flex; align-items: center; gap: 4px; }
 .book-desc { color: var(--ink-soft); font-size: 0.95rem; margin: 0; }
 .book-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: auto; padding-top: 4px; }
@@ -566,7 +573,7 @@ body[data-auth-page] { padding-bottom: 24px; }
   .book-body { padding: 12px; gap: 8px; }
   .book-title { font-size: 1.05rem; }
   .book-desc { font-size: 0.88rem; }
-  .book-meta { gap: 8px; font-size: 0.8rem; }
+  .book-meta { gap: 2px; font-size: 0.8rem; }
   .badge { font-size: 0.68rem; padding: 2px 6px; }
   .book-actions { flex-direction: column; align-items: stretch; }
   .book-actions .btn { width: 100%; }

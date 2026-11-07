@@ -671,9 +671,9 @@ function dailyShuffle(list, dateKey) {
 }
 
 /* Book cards, post-style (TY Nov 5 ~10:43 PM): each card reads like a
-   post — a slim gradient band, a title header, a meta line (genre,
-   rating, chapter count, length), the opening text, and the Listen /
-   Read actions with the voice picker. A locked book (rating above
+   post — a slim gradient band, a title header, a meta block (genre,
+   read time, and chapters + badges on three separate fixed lines),
+   the opening text, and the Listen / Read actions with the voice picker. A locked book (rating above
    what this reader may open) shows a small grey lock icon and stays
    visible in the grid — clicking it shows the age message, never
    the book. Written from scratch for YourDailyBook; no code copied
@@ -711,10 +711,9 @@ function bookCardHTML(book, opts) {
       <div class="book-body">
         <h3 class="book-title">${escapeHtml(book.title)}</h3>
         <p class="book-meta">
-          <span>${escapeHtml(book.genre)}</span>
-          <span>📖 13 chapters</span>
-          <span>⏱ ${book.dur}</span>
-          <span class="book-badges"><span class="badge badge-rating">${ratingLabel(book.rating)}</span><span class="badge badge-new">New today</span></span>
+          <span class="meta-line meta-genre">${escapeHtml(book.genre)}</span>
+          <span class="meta-line meta-dur">⏱ ${book.dur}</span>
+          <span class="meta-line meta-rest"><span>📖 13 chapters</span><span class="book-badges"><span class="badge badge-rating">${ratingLabel(book.rating)}</span><span class="badge badge-new">New today</span></span></span>
         </p>
         <p class="book-desc">${escapeHtml(book.desc)}</p>
         <p class="preview-label">The opening pages</p>
