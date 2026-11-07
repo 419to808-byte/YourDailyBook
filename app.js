@@ -4,6 +4,11 @@
    book text. Everything below is PLACEHOLDER data to be
    replaced by the real generated catalog, real audio, and
    real account/billing systems at launch.
+
+   Signed-in state comes from the Supabase session auth.js stores
+   in localStorage under "ydb-session" (see auth.js — the single
+   session implementation; this page only reads it). There is no
+   demo sign-in on this page.
    ============================================================ */
 
 "use strict";
@@ -207,27 +212,75 @@ function escapeHtml(str) {
   }[c]));
 }
 
-/* ---------- Simulated sign-in state ---------- */
-/* DEMO ONLY: no backend, no real accounts. The state lives in a
-   variable + localStorage so the preview gate and the age modes can
-   be tested (visitor / child / adult). Real auth + Stripe replace
-   this at launch. The account's age comes from the date of birth
-   given at sign-up; visitors (not signed in) are child-safe by
-   default, since age cannot be verified. */
+/* ---------- Signed-in state (Supabase session) ---------- */
+/* Real auth (Supabase Auth / GoTrue) — the session is the one
+   auth.js stores in localStorage under "ydb-session" after a real
+   log-in (access + refresh token + expiry + user). This page only
+   READS it: isSignedIn() is true for a valid, unexpired access
+   token. There is no demo sign-in on this page — no local account
+   is ever minted here, and a missing DOB never means adult.
+   The age tier (and paid status) arrive with the session profile
+   the API returns, cached in memory for this session only
+   (applySessionProfile); they are never stored in localStorage and
+   never computed from a client-side DOB. Until a profile has been
+   applied, a signed-in reader gets visitor treatment (PG only,
+   child mode) — the safe default, and the API enforces the real
+   gate on every request. Visitors (not signed in) are child-safe
+   by default, since age cannot be verified. */
 
-const AUTH_KEY = "ydb-auth";
-let auth = { signedIn: false, name: "", dob: null, isAdult: false, writeMode: "child" };
-try {
-  const saved = JSON.parse(localStorage.getItem(AUTH_KEY) || "null");
-  if (saved && saved.signedIn) {
-    auth = Object.assign({ signedIn: false, name: "", dob: null, isAdult: false, writeMode: "child" }, saved);
+const SESSION_KEY = "ydb-session";
+// The reader's profile from the API (tier, paid, email verification,
+// weekly-book prefs) — in-memory only, never localStorage.
+let sessionProfile = null;
+let auth = { signedIn: false, name: "", email: "", dob: null, isAdult: false, writeMode: "child" };
+
+// The stored Supabase session, or null when absent / malformed.
+function loadStoredSession() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
+    if (saved && typeof saved.access_token === "string" && saved.access_token &&
+      typeof saved.expires_at === "number") return saved;
+    return null;
+  } catch (e) { return null; }
+}
+
+// Apply a stored session to the in-memory display state. The tier
+// comes from sessionProfile (API-provided), never from the token
+// and never from a client-side DOB.
+function applySession(session) {
+  if (!session || typeof session.access_token !== "string" || !session.access_token ||
+    typeof session.expires_at !== "number" || session.expires_at <= Date.now()) {
+    auth = { signedIn: false, name: "", email: "", dob: null, isAdult: false, writeMode: "child" };
+    return false;
   }
-} catch (e) { /* corrupted saved state — stay signed out */ }
+  const user = session.user || {};
+  const meta = user.user_metadata || {};
+  const tier = sessionProfile && sessionProfile.ageTier ? sessionProfile.ageTier : null;
+  const isAdult = tier === "adult";
+  auth = {
+    signedIn: true,
+    name: (meta.name || user.email || "Reader"),
+    email: user.email || "",
+    dob: (sessionProfile && sessionProfile.dob) || null,
+    isAdult: isAdult,
+    writeMode: isAdult ? "adult" : "child"
+  };
+  return true;
+}
+
+// Returning visitor: restore the session from storage. A corrupted
+// saved state stays signed out. The legacy demo keys ("ydb-auth",
+// "ydb-profile") were never real accounts — delete them as hygiene.
+try {
+  localStorage.removeItem("ydb-auth");
+  localStorage.removeItem("ydb-profile");
+} catch (e) { /* ignore */ }
+applySession(loadStoredSession());
 
 function isSignedIn() { return auth.signedIn === true; }
 
-// An adult is a signed-in user whose account age is 18+. Visitors
-// and child accounts are child-safe.
+// An adult is a signed-in user whose API-provided tier is adult.
+// Visitors and child accounts are child-safe.
 function isAdultUser() { return isSignedIn() && auth.isAdult === true; }
 
 // Content ratings (locked Nov 6, 2026 — the old 1–4 level scale is gone).
@@ -241,23 +294,27 @@ const RATINGS = ["PG", "PG-13", "R"];
 // Display label: "PG", "PG-13", "Rated R".
 function ratingLabel(rating) { return rating === "R" ? "Rated R" : rating; }
 
-// The reader's age in whole years, from the date of birth on the
-// account. Calendar-based (not milliseconds / 365.25), so the age
-// changes on the birthday itself. null = visitor (age unverified).
-// The demo log-in has no DOB on file, so it signs in as adult.
+// The reader's age in whole years — DISPLAY ONLY, from the
+// API-provided session profile when it carries one. null = visitor
+// (age unverified) or a signed-in reader whose profile has not
+// loaded yet. The API computes the tier from the stored DOB on
+// every request; this page never computes a tier from a
+// client-side DOB — there is no client-side DOB any more.
 function userAgeYears() {
   if (!isSignedIn()) return null;
-  if (!auth.dob) return 18;
-  const age = ageFromDob(auth.dob);
-  return age === null ? 18 : age;
+  if (sessionProfile && typeof sessionProfile.ageYears === "number") return sessionProfile.ageYears;
+  return null;
 }
 
-// Which ratings this reader may open.
+// Which ratings this reader may open — a DISPLAY RULE fed by the
+// API-provided tier (child / teen / adult). A signed-in reader
+// with no profile yet gets visitor treatment (PG only) until the
+// profile loads; the API is the enforcer on every request.
 function allowedRatings() {
-  const age = userAgeYears();
-  if (age === null) return ["PG"];
-  if (age >= 18) return ["PG", "PG-13", "R"];
-  if (age >= 13) return ["PG", "PG-13"];
+  if (!isSignedIn()) return ["PG"];
+  const tier = sessionProfile && sessionProfile.ageTier ? sessionProfile.ageTier : null;
+  if (tier === "adult") return ["PG", "PG-13", "R"];
+  if (tier === "teen") return ["PG", "PG-13"];
   return ["PG"];
 }
 
@@ -287,25 +344,45 @@ function ageFromDob(dobStr) {
   return age;
 }
 
-function persistAuth() {
-  try { localStorage.setItem(AUTH_KEY, JSON.stringify(auth)); } catch (e) { /* storage unavailable — session-only */ }
+// Apply the profile the API returns for this session (tier, paid,
+// email verification, weekly-book prefs). Display rules only — the
+// API re-derives the tier from the stored DOB on every request.
+function applySessionProfile(profile) {
+  if (!profile || typeof profile !== "object") { sessionProfile = null; return; }
+  sessionProfile = {
+    ageTier: profile.age_tier || profile.ageTier || null,
+    ageYears: typeof profile.age_years === "number" ? profile.age_years : (typeof profile.ageYears === "number" ? profile.ageYears : null),
+    paid: profile.paid === true,
+    emailVerified: profile.email_verified === true || profile.emailVerified === true,
+    dob: profile.dob || null,
+    prefs: (profile.about !== undefined || profile.genres !== undefined || profile.ratings !== undefined || profile.voice !== undefined) ? {
+      about: profile.about || "",
+      genres: profile.genres || [],
+      ratings: profile.ratings || [],
+      voice: profile.voice || "Warm"
+    } : null
+  };
+  applySession(loadStoredSession());
+  updateAuthUI();
+  updateWriteModeUI();
+  renderRatingFilter();
+  renderPfRatings();
+  prefillPersonalizeForm();
+  renderBrowseRatingFilter();
+  renderBrowse();
 }
 
-function signIn(name, dob) {
-  // dob is an ISO date string from the sign-up form. Log-in (demo)
-  // has no DOB on file — treated as adult; real auth carries the
-  // account's stored date of birth.
-  const age = ageFromDob(dob);
-  const isAdult = age === null ? true : age >= 18;
-  auth = {
-    signedIn: true,
-    name: (name || "Reader").trim() || "Reader",
-    dob: dob || null,
-    isAdult: isAdult,
-    writeMode: "child"
-  };
-  applyWriteModeFromDob(); // mode comes from the birthday, never from a user flip
-  persistAuth();
+// Install a Supabase session (the shape auth.js saves after a real
+// GoTrue log-in: { access_token, refresh_token, expires_at, user }).
+// This is the seam the real log-in flow uses — it does NOT mint a
+// session from a name/DOB and it never treats a missing DOB as
+// adult. Anything that is not a session-shaped object is refused
+// (returns false) and the reader stays a visitor.
+function signIn(session) {
+  if (!session || typeof session !== "object" ||
+    typeof session.access_token !== "string" || !session.access_token) return false;
+  try { localStorage.setItem(SESSION_KEY, JSON.stringify(session)); } catch (e) { /* storage unavailable — session-only */ }
+  applySession(session);
   updateAuthUI();
   updateWriteModeUI();
   renderRatingFilter();
@@ -316,11 +393,17 @@ function signIn(name, dob) {
   renderBooks();
   renderBrowseRatingFilter(); // browse rating options follow the new age
   renderBrowse(); // locks refresh in the browse view too
+  return true;
 }
 
 function signOut() {
-  auth = { signedIn: false, name: "", dob: null, isAdult: false, writeMode: "child" };
-  try { localStorage.removeItem(AUTH_KEY); } catch (e) { /* ignore */ }
+  sessionProfile = null;
+  auth = { signedIn: false, name: "", email: "", dob: null, isAdult: false, writeMode: "child" };
+  try { localStorage.removeItem(SESSION_KEY); } catch (e) { /* ignore */ }
+  // Server-side logout (POST /auth/v1/logout) lives in auth.js, which
+  // owns the Supabase config — this page must not duplicate it.
+  // Clearing the stored session signs this browser out; the refresh
+  // token is left to expire / rotate server-side.
   // If the player was past the visitor preview limit, pull it back.
   if (player.current && player.position > PREVIEW_AUDIO_SECS) {
     player.position = PREVIEW_AUDIO_SECS;
@@ -357,8 +440,9 @@ function updateAuthUI() {
    - Birthday 18+ → adult access is granted (adult mode).
    - Visitor (not signed in): child mode — age can't be verified.
    The user does NOT flip the switch themselves. The mode is derived
-   from the account's date of birth only (signIn sets it from the
-   DOB; the demo log-in has no DOB on file, so it signs in as adult).
+   from the account's date of birth only (the API-provided tier sets
+   it when the session profile is applied — see applySessionProfile;
+   there is no UI control that lets a user change their own mode).
    There is no UI control that lets a signed-in user change their
    own mode — the switch in Write Your Own is a locked display
    indicator, not a control.
@@ -367,12 +451,6 @@ function updateAuthUI() {
    no sexual content involving minors, ever — applies in BOTH modes. */
 
 function writeMode() { return auth.writeMode || "child"; }
-
-// Internal only: derive the mode from the account age (date of
-// birth). Called from signIn — never from a UI control.
-function applyWriteModeFromDob() {
-  auth.writeMode = auth.isAdult ? "adult" : "child";
-}
 
 function updateWriteModeUI() {
   // The switch is a display indicator, not a control: it shows the
@@ -482,15 +560,15 @@ function drawPersonalizedRating() {
 }
 
 // Made For You pre-fill (v7): if signed in and a weekly-book
-// profile was saved at sign-up (localStorage "ydb-profile"), fill
-// the form from it and point at Settings for changes. Visitors (or
-// no profile) keep the plain preview form. A saved rating is only
-// ever applied where the reader's age allows it — a signed-in
-// under-13 user never sees Rated R checked.
+// profile was saved at sign-up (profiles, via the API — in-memory
+// sessionProfile.prefs), fill the form from it and point at
+// Settings for changes. Visitors (or no profile) keep the plain
+// preview form. A saved rating is only ever applied where the
+// reader's age allows it — a signed-in under-13 user never sees
+// Rated R checked.
 function prefillPersonalizeForm() {
   const note = $("#pfSavedNote");
-  let profile = null;
-  try { profile = JSON.parse(localStorage.getItem("ydb-profile") || "null"); } catch (e) { profile = null; }
+  const profile = (sessionProfile && sessionProfile.prefs) || null;
   if (!isSignedIn() || !profile) {
     // Visitor (or signed in with no saved profile): plain preview
     // form, defaults re-applied by renderPfRatings.
@@ -1993,7 +2071,7 @@ $$("[data-plan]").forEach(btn => btn.addEventListener("click", () => {
   // (the first main tab) with genre "All" — the landing shows the
   // breadth of the catalog. activeGenre already defaults to "All".
   switchTab("daily");
-  updateAuthUI(); // restore the signed-in header for returning demo users
+  updateAuthUI(); // restore the signed-in header for returning users
   // Fill voice selects (player + Made For You form + Write Your Own genre select).
   $("#playerVoiceSelect").innerHTML = voiceOptionsHTML("Warm");
   $("#pfVoice").innerHTML = voiceOptionsHTML("Warm");

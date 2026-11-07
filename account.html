@@ -91,20 +91,20 @@
       </div>
       <div class="form-field">
         <label for="acPlan">Plan</label>
-        <select id="acPlan">
-          <option value="listener">Listener — $9.99/month</option>
-          <option value="author">Author — $24.99/month</option>
-        </select>
+        <p id="acPlan" class="plan-display">Listener — $9.99/month</p>
+        <div class="hint">Your plan is shown here — changing it goes through Stripe at launch, never through a setting on this page.</div>
       </div>
       <div class="form-field">
         <label for="acNewPass">New password</label>
         <input type="password" id="acNewPass" placeholder="Leave blank to keep your current password" minlength="8" autocomplete="new-password">
-        <div class="hint">Demo: sign-in doesn't check passwords yet, so a new password isn't stored as a credential — you'll set a real one when real accounts open at launch.</div>
+        <div class="hint">Your new password needs at least 8 characters. It is sent to the account service over an encrypted connection — it is never stored in this browser.</div>
       </div>
       <p class="small muted" id="acDobNote"></p>
+      <p class="small muted hidden" id="acParentNote"></p>
       <p class="form-error hidden" id="acAccountMsg" role="alert"></p>
       <button class="btn btn-primary" id="acSaveAccountBtn" type="button">Save Account</button>
-      <p class="mt-2"><button class="btn btn-ghost btn-sm" id="acctSignoutBtn" type="button">Sign Out</button></p>
+      <p class="mt-2"><button class="btn btn-ghost btn-sm" id="acctSignoutBtn" type="button">Sign Out</button>
+      <button class="btn btn-ghost btn-sm" id="acSignoutEverywhereBtn" type="button">Sign Out of All Other Devices</button></p>
     </section>
 
     <!-- Section 3: Privacy & data -->
@@ -120,7 +120,7 @@
         <div class="hint">Deletes your whole account and your personal details. Once deleted it cannot be restored — you'd need to sign up again as a new user.</div>
       </div>
       <p class="form-ok hidden" id="acDeleteMsg" role="status"></p>
-      <p class="fine-print">Demo: this clears the data stored in this browser only. At launch, account deletion is completed within 30 days of your request, and you'll get a confirmation email. Stripe payment records and books you've bought the license to are not deleted — see <a href="policies.html#data-deletion">Data Deletion</a>.</p>
+      <p class="fine-print">Account deletion is completed within 30 days of your request, and you'll get a confirmation email. Stripe payment records and books you've bought the license to are not deleted — see <a href="policies.html#data-deletion">Data Deletion</a>.</p>
     </section>
   </div>
 </div>
@@ -137,6 +137,6 @@
   </div>
 </footer>
 
-<script src="auth.js?v=17.1"></script>
+<script src="auth.js?v=17.2"></script>
 </body>
 </html>
