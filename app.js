@@ -1942,19 +1942,40 @@ function showWriteStep(n) {
   [1, 2, 3, 4].forEach(i => $("#writeStep" + i).classList.toggle("hidden", i !== n));
 }
 
+// The built outline (titles + rendered heading/note) is kept in memory
+// so the draft saver can persist it — it restores across reload (L-OUT).
+let builtOutline = null;
+
 function buildOutline() {
+  // L-O2: the outline is built from the writer's idea — an empty idea
+  // must not build a generic outline.
+  if (!$("#wfIdea").value.trim()) {
+    const note = $("#wfStep1Note");
+    note.textContent = "Tell us your book idea first — the outline is built from your idea, not a generic template.";
+    note.dataset.error = "1";
+    $("#wfIdea").focus();
+    return;
+  }
   const genre = $("#wfGenre").value;
   const length = $("#wfLength").value;
   const count = (length === "long" || length === "longpremium") ? 24 : 16;
   const titles = OUTLINE_TITLES.slice(0, count);
-  $("#wfOutlineTitle").textContent = "Your chapter outline — " + genre + " (" + count + " chapters)" + (writeMode() === "child" ? " — age-appropriate" : "");
+  const titleText = "Your chapter outline — " + genre + " (" + count + " chapters)" + (writeMode() === "child" ? " — age-appropriate" : "");
+  const noteText = writeMode() === "child"
+    ? "This outline is age-appropriate: no sexual content, no adult themes. In the full product, each chapter is written from the story bible, and you approve each one before the next is written."
+    : "This outline is a preview. In the full product, each chapter is written from the story bible, and you approve each one before the next is written.";
+  renderOutline(titleText, noteText, titles);
+  builtOutline = { title: titleText, note: noteText, titles };
+  saveWriteDraft();
+  showWriteStep(2);
+}
+
+function renderOutline(titleText, noteText, titles) {
+  $("#wfOutlineTitle").textContent = titleText;
   $("#wfOutlineList").innerHTML = titles.map((t, i) =>
     "<li><strong>Chapter " + (i + 1) + ":</strong> " + escapeHtml(t) + "</li>"
   ).join("");
-  $("#wfOutlineNote").textContent = writeMode() === "child"
-    ? "This outline is age-appropriate: no sexual content, no adult themes. In the full product, each chapter is written from the story bible, and you approve each one before the next is written."
-    : "This outline is a preview. In the full product, each chapter is written from the story bible, and you approve each one before the next is written.";
-  showWriteStep(2);
+  $("#wfOutlineNote").textContent = noteText;
 }
 
 function buildQuestions() {
@@ -1977,8 +1998,9 @@ function buildQuestions() {
 /* ---------- Write Your Own draft persistence ---------- */
 
 // The writer's text survives a refresh: the idea, about, genre,
-// length, and revision-question answers are saved to localStorage
-// on every keystroke and restored on load. "Start Over" clears it.
+// length, revision-question answers, and the built outline are saved
+// to localStorage on every keystroke and restored on load.
+// "Start Over" clears it.
 const WRITE_DRAFT_KEY = "ydb-write-draft";
 
 function readWriteDraft() {
@@ -1993,7 +2015,10 @@ function saveWriteDraft() {
       about: $("#wfAbout").value,
       genre: $("#wfGenre").value,
       length: $("#wfLength").value,
-      answers: Array.from(document.querySelectorAll("#wfQuestions textarea")).map(t => t.value)
+      answers: Array.from(document.querySelectorAll("#wfQuestions textarea")).map(t => t.value),
+      // L-OUT: keep a previously built outline across keystroke saves
+      // (builtOutline is null until this session builds one).
+      outline: builtOutline || readWriteDraft().outline || null
     }));
   } catch (e) { /* storage unavailable — draft is session-only */ }
 }
@@ -2004,10 +2029,20 @@ function restoreWriteDraft() {
   if (d.about != null) $("#wfAbout").value = d.about;
   if (d.genre) $("#wfGenre").value = d.genre;
   if (d.length) $("#wfLength").value = d.length;
+  // L-OUT: the built outline restores too — re-render it and reopen step 2.
+  if (d.outline && Array.isArray(d.outline.titles) && d.outline.titles.length) {
+    builtOutline = d.outline;
+    renderOutline(d.outline.title || "Your chapter outline", d.outline.note || "", d.outline.titles);
+    showWriteStep(2);
+  }
 }
 
 function clearWriteDraft() {
   try { localStorage.removeItem(WRITE_DRAFT_KEY); } catch (e) { /* ignore */ }
+  builtOutline = null;
+  $("#wfOutlineList").innerHTML = "";
+  $("#wfOutlineTitle").textContent = "Your chapter outline";
+  $("#wfOutlineNote").textContent = "This outline is a preview. In the full product, each chapter is written from the story bible, and you approve each one before the next is written.";
   $("#wfIdea").value = "";
   $("#wfAbout").value = "";
   $("#wfGenre").value = GENRES[0];
@@ -2020,6 +2055,11 @@ $("#wfQuestionsBtn").addEventListener("click", buildQuestions);
 $("#wfFinishBtn").addEventListener("click", () => showWriteStep(4));
 $("#wfRestartBtn").addEventListener("click", () => { clearWriteDraft(); showWriteStep(1); });
 $("#wfIdea").addEventListener("input", saveWriteDraft);
+$("#wfIdea").addEventListener("input", () => {
+  // Clear a stale L-O2 validation message once the writer starts typing.
+  const note = $("#wfStep1Note");
+  if (note.dataset.error) { delete note.dataset.error; updateWriteModeUI(); }
+});
 $("#wfAbout").addEventListener("input", saveWriteDraft);
 $("#wfGenre").addEventListener("change", saveWriteDraft);
 $("#wfLength").addEventListener("change", saveWriteDraft);
