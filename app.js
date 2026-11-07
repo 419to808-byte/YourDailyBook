@@ -1888,13 +1888,63 @@ function buildQuestions() {
       <label for="wq${i}">${i + 1}. ${escapeHtml(q[0])} <span>— ${escapeHtml(q[1])}</span></label>
       <textarea id="wq${i}" placeholder="Your answer, in your own words…"></textarea>
     </div>`).join("");
+  // A refresh rebuilds these fields — restore any saved answers.
+  const d = readWriteDraft();
+  if (d.answers) d.answers.forEach((a, i) => { const t = $("#wq" + i); if (t && a != null) t.value = a; });
   showWriteStep(3);
+}
+
+/* ---------- Write Your Own draft persistence ---------- */
+
+// The writer's text survives a refresh: the idea, about, genre,
+// length, and revision-question answers are saved to localStorage
+// on every keystroke and restored on load. "Start Over" clears it.
+const WRITE_DRAFT_KEY = "ydb-write-draft";
+
+function readWriteDraft() {
+  try { return JSON.parse(localStorage.getItem(WRITE_DRAFT_KEY) || "null") || {}; }
+  catch (e) { return {}; }
+}
+
+function saveWriteDraft() {
+  try {
+    localStorage.setItem(WRITE_DRAFT_KEY, JSON.stringify({
+      idea: $("#wfIdea").value,
+      about: $("#wfAbout").value,
+      genre: $("#wfGenre").value,
+      length: $("#wfLength").value,
+      answers: Array.from(document.querySelectorAll("#wfQuestions textarea")).map(t => t.value)
+    }));
+  } catch (e) { /* storage unavailable — draft is session-only */ }
+}
+
+function restoreWriteDraft() {
+  const d = readWriteDraft();
+  if (d.idea != null) $("#wfIdea").value = d.idea;
+  if (d.about != null) $("#wfAbout").value = d.about;
+  if (d.genre) $("#wfGenre").value = d.genre;
+  if (d.length) $("#wfLength").value = d.length;
+}
+
+function clearWriteDraft() {
+  try { localStorage.removeItem(WRITE_DRAFT_KEY); } catch (e) { /* ignore */ }
+  $("#wfIdea").value = "";
+  $("#wfAbout").value = "";
+  $("#wfGenre").value = GENRES[0];
+  $("#wfLength").value = "standard";
+  Array.from(document.querySelectorAll("#wfQuestions textarea")).forEach(t => { t.value = ""; });
 }
 
 $("#wfOutlineBtn").addEventListener("click", buildOutline);
 $("#wfQuestionsBtn").addEventListener("click", buildQuestions);
 $("#wfFinishBtn").addEventListener("click", () => showWriteStep(4));
-$("#wfRestartBtn").addEventListener("click", () => showWriteStep(1));
+$("#wfRestartBtn").addEventListener("click", () => { clearWriteDraft(); showWriteStep(1); });
+$("#wfIdea").addEventListener("input", saveWriteDraft);
+$("#wfAbout").addEventListener("input", saveWriteDraft);
+$("#wfGenre").addEventListener("change", saveWriteDraft);
+$("#wfLength").addEventListener("change", saveWriteDraft);
+// Question textareas are rebuilt by buildQuestions — listen on the container.
+$("#wfQuestions").addEventListener("input", saveWriteDraft);
 
 // Child / adult mode switch (Write Your Own) — display only. The
 // switch is set by the birthday on the account (see
@@ -1948,6 +1998,7 @@ $$("[data-plan]").forEach(btn => btn.addEventListener("click", () => {
   $("#playerVoiceSelect").innerHTML = voiceOptionsHTML("Warm");
   $("#pfVoice").innerHTML = voiceOptionsHTML("Warm");
   $("#wfGenre").innerHTML = GENRES.map(g => "<option>" + escapeHtml(g) + "</option>").join("");
+  restoreWriteDraft(); // the writer's draft text survives a refresh
   renderPfGenres();
   renderGenrePills();
   renderRatingFilter(); // age-capped rating choices for the catalog
