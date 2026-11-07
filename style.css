@@ -528,8 +528,33 @@ body[data-auth-page] { padding-bottom: 24px; }
   .price-grid { grid-template-columns: 1fr; }
   .policy-grid { grid-template-columns: repeat(2, 1fr); }
   .footer-grid { grid-template-columns: 1fr 1fr; }
-  .player-info { width: 150px; }
+  /* H1 fix (Nov 6): at ≤900px the single-row player cannot fit cover +
+     info + controls + progress + tools in ~728px — the fixed siblings
+     alone total ~528px, so .player-info (width 150px, shrinkable,
+     min-width 0) was crushed to ~16px and the track to ~32px. A floor
+     alone cannot fit either (150px info still overflows by ~130px),
+     so the player goes two-row here: info gets a hard 180px floor on
+     row 1 (cover 48 + info 180 + controls 134 + tools ~346 + gaps +
+     padding = ~762px at 768px) and the progress track takes a full
+     second row, keeping both time labels and a wide seek target.
+     The ≤640px block below overrides all of this (single row, tools
+     hidden), so phone behavior is unchanged. */
+  .player-inner { flex-wrap: wrap; gap: 10px; padding: 10px 12px; }
+  .player-info { flex: 0 0 180px; min-width: 180px; width: 180px; }
+  .player-progress { flex: 1 1 100%; order: 5; min-width: 0; }
+  body { padding-bottom: 116px; } /* room for the two-row sticky player */
+  .chapter-panel { bottom: 112px; } /* clear the taller two-row player */
   .player-tools select { max-width: 110px; }
+}
+@media (max-width: 767px) {
+  /* 641–767px: row 1 (cover 48 + info 180 + controls 134) cannot also
+     hold the ~346px tools row, so tools wrap — but with the progress
+     track on its own full row that would make a 3-row player (~140px)
+     taller than the 116px body padding. Let the track share row 1
+     instead (it gets ~225–295px there, still a usable seek target)
+     so the player stays two rows (~109px) and the tools sit on row 2.
+     The ≤640px block below overrides this again (single row). */
+  .player-progress { flex: 1 1 160px; order: 4; min-width: 120px; }
 }
 @media (max-width: 640px) {
   /* Phone = the same laptop layout, compacted — NOT a stacked,

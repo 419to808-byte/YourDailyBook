@@ -1351,12 +1351,19 @@ function loadBook(book, voice, autoplay) {
   player.current = book;
   // Resume from the saved listening position (if any) — do not restart
   // from 0. Clamped to the book length and, for visitors, to the
-  // 90-second preview limit.
+  // 90-second preview limit. EXCEPTION (M1): a visitor whose saved
+  // position is at/past the preview limit has already exhausted that
+  // preview — restart from 0 so the preview replays instead of
+  // setPlaying() treating position >= limit as "preview ended" and
+  // gating straight to signup. Signed-in users have limit Infinity,
+  // so this never triggers for them and their restore is unchanged.
   const prog = getProgress(book.id);
   const limit = previewLimitSecs();
-  player.position = (prog && typeof prog.timeSec === "number")
+  let restored = (prog && typeof prog.timeSec === "number")
     ? Math.max(0, Math.min(prog.timeSec, book.secs, limit))
     : 0;
+  if (!isSignedIn() && restored >= limit) restored = 0;
+  player.position = restored;
   _lastAudioSaveSec = -1;
   markCurrentlyReading(book);
   player.voice = voice || player.voice;
@@ -1838,7 +1845,12 @@ $("#personalizeForm").addEventListener("submit", e => {
     <button class="btn btn-primary" type="button" id="previewPlayBtn">▶ Listen to a Sample Chapter</button>
     <p class="small muted mt-2">Sample playback is simulated in this preview — the real player plays your full weekly book.</p>`;
   $("#previewPlayBtn").addEventListener("click", () => {
-    const sample = BOOKS.find(b => b.genre === genre) || BOOKS[0];
+    // Sample = the first book of the picked genre this reader is
+    // allowed to hear (M2: all Romance books are PG-13/R, so a
+    // visitor picked the locked r1 before and got the age-lock modal
+    // instead of audio). Fall back to any allowed book, then BOOKS[0].
+    const sample = BOOKS.find(b => b.genre === genre && isRatingAllowed(b.rating))
+      || BOOKS.find(b => isRatingAllowed(b.rating)) || BOOKS[0];
     loadBook(sample, voice, true);
     document.getElementById("player").scrollIntoView({ behavior: "smooth", block: "nearest" });
   });
