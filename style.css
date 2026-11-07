@@ -193,11 +193,12 @@ img { max-width: 100%; }
 .tab-panel { display: none; padding: 20px 0 8px; }
 .tab-panel.active { display: block; }
 
-/* Genre pills — ONE line directly under the main tabs; horizontal
-   scroll on narrow screens instead of wrapping. */
+/* Genre pills — wrap onto as many lines as needed so every genre is
+   shown; no horizontal scroll on any screen (TY Nov 6: no scrollbar
+   on genres). Applies to the Daily Books row and the browse row. */
 .genre-row {
-  display: flex; gap: 8px; flex-wrap: nowrap; overflow-x: auto;
-  margin: 0 0 20px; padding-bottom: 4px; scrollbar-width: thin;
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin: 0 0 20px;
 }
 .genre-pill {
   flex: 0 0 auto; white-space: nowrap;
