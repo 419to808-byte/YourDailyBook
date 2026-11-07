@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sign Up — YourDailyBook</title>
 <meta name="description" content="Create your YourDailyBook account — and tell us about yourself, so your weekly personalized book is written just for you.">
-<link rel="stylesheet" href="style.css?v=17.3">
+<link rel="stylesheet" href="style.css?v=17.4">
+<link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 </head>
 <body data-auth-page="signup">
 
@@ -135,9 +137,6 @@
           <span>I've read the <a href="policies.html" target="_blank">Policies</a> and agree to the Terms of Service. (For accounts under 18, a parent or guardian agrees.)</span>
         </label>
       </div>
-      <div class="callout mb-2 hidden" id="feeCallout">
-        <p><strong>About the upfront fee.</strong> When you sign up, we immediately do the pre-render work — caching the tone, tempo, and emotion directions and rendering the launch catalog in the narrator voices. That work happens the moment signup completes, so the one-time upfront fee ($[amount], to be set) is <strong>non-refundable once signup is complete</strong>. Payment is handled securely by Stripe — we never see or store your card number.</p>
-      </div>
       <p class="form-error hidden" id="opError" role="alert"></p>
       <button class="btn btn-primary btn-block" type="submit" id="signupSubmitBtn">Join the Waitlist</button>
       <p class="fine-print mt-2">By signing up you agree to the Terms of Service and Privacy Policy. Cancel anytime from your account page.</p>
@@ -215,6 +214,6 @@
   </div>
 </footer>
 
-<script src="auth.js?v=17.2"></script>
+<script src="auth.js?v=17.3"></script>
 </body>
 </html>

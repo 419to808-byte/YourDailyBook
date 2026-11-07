@@ -224,7 +224,7 @@ img { max-width: 100%; }
 select, input[type="text"], input[type="email"], input[type="password"], input[type="date"], input[type="search"], textarea {
   font-family: var(--font-sans); font-size: 0.98rem; color: var(--ink);
   padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-sm);
-  background: var(--surface); width: 100%; min-height: 44px; /* L1: tap target ≥44px (player-tools select exempted below) */
+  background: var(--surface); width: 100%; min-height: 44px; /* L1: tap target ≥44px (player-tools select now matches this too — see Fix 7) */
 }
 select:focus, input:focus, textarea:focus { outline: 2px solid var(--accent-dark); outline-offset: 1px; border-color: var(--accent-dark); }
 textarea { min-height: 90px; resize: vertical; }
@@ -337,9 +337,9 @@ textarea { min-height: 90px; resize: vertical; }
 .check-chip {
   display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem; font-weight: 600;
   padding: 7px 12px; border: 1px solid var(--line); border-radius: 999px; cursor: pointer;
-  background: var(--surface); color: var(--ink-soft); user-select: none; min-height: 44px; /* L1 */
+  background: var(--surface); color: var(--ink-soft); user-select: none; min-height: 44px; /* L1 + Fix 7: the label IS the 44px hit area for the checkbox */
 }
-.check-chip input { accent-color: var(--accent); }
+.check-chip input { accent-color: var(--accent); width: 20px; height: 20px; flex: none; margin: 0; /* Fix 7: checkbox itself 13px → 20px; the 44px label stays the target */ }
 .check-chip:has(input:checked) { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-dark); }
 /* A rating box that is not available for this reader's age is greyed
    out and unclickable (see renderPfRatings). */
@@ -398,17 +398,27 @@ textarea { min-height: 90px; resize: vertical; }
 .policy-card h3 { font-size: 1.15rem; margin-bottom: 6px; }
 .policy-card p { color: var(--ink-soft); font-size: 0.93rem; margin: 0; }
 .policy-card .policy-link { color: var(--accent); font-weight: 700; font-size: 0.9rem; margin-top: 10px; display: inline-block; }
+/* Fix 7: policies "← Back to YourDailyBook" was 26px. Its display /
+   margin live in policies.html's own <style> block (which sets
+   neither min-height nor padding), so this only raises the hit area. */
+.back-link { min-height: 44px; padding: 10px 0; }
 
 /* ---------------- Footer ---------------- */
 .site-footer { background: var(--ink); color: #cbd5e1; padding: 56px 0 24px; margin-top: 32px; }
 .site-footer a { color: #93c5fd; }
 /* L1: footer nav links are 44px touch targets (were ~17px). */
 .site-footer ul a { display: inline-block; min-height: 44px; padding: 12px 0; }
+/* Fix 7: inline links inside footer paragraphs and the footer-bottom
+   row were ~15–17px. Paragraph links get a 24px minimum (WCAG 2.2 AA)
+   without disturbing the text line; footer-bottom links (e.g. the
+   support address on signup/account) get the full 44px. */
+p a { display: inline-block; min-height: 24px; }
+.footer-bottom a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 4px; }
 .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 32px; margin-bottom: 32px; }
 .site-footer h4 { color: #fff; font-size: 1.1rem; margin-bottom: 12px; }
 .site-footer ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
 .site-footer p { font-size: 0.93rem; color: #94a3b8; }
-.footer-bottom { border-top: 1px solid #334155; padding-top: 20px; font-size: 0.85rem; color: #94a3b8; display: flex; gap: 16px; flex-wrap: wrap; justify-content: space-between; }
+.footer-bottom { border-top: 1px solid #334155; padding-top: 20px; font-size: 0.85rem; color: #94a3b8; display: flex; gap: 16px; flex-wrap: wrap; justify-content: space-between; align-items: center; }
 
 /* ---------------- Sticky player ---------------- */
 .player {
@@ -428,12 +438,16 @@ textarea { min-height: 90px; resize: vertical; }
 }
 .player-info { min-width: 0; width: 220px; }
 .player-title { font-weight: 700; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.player-sub { font-size: 0.8rem; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Fix 6: subtitle may wrap to two lines (was single-line ellipsis, so
+   "Fantasy · Chapter 3 of 12 · Narrated by Warm · PG-13" clipped at
+   360px vs a 180–220px box). Two lines max; one-line subtitles are
+   unaffected. Phones override this back to one line (see ≤640px). */
+.player-sub { font-size: 0.8rem; color: #94a3b8; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; white-space: normal; }
 .player-controls { display: flex; align-items: center; gap: 6px; flex: none; }
 .player-btn {
   background: none; border: none; color: var(--player-ink); cursor: pointer;
-  width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  font-size: 1rem;
+  width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; /* Fix 7: 44px tap target (was 38px); .play was already 46px */
 }
 .player-btn:hover { background: #334155; }
 .player-btn.play {
@@ -454,12 +468,13 @@ textarea { min-height: 90px; resize: vertical; }
 .player-tools select {
   background: #1e293b; color: var(--player-ink); border: 1px solid #475569;
   padding: 6px 8px; font-size: 0.85rem; border-radius: 8px; width: auto;
-  min-height: 0; /* L1 exception: player height budget from the H1 two-row fix */
+  min-height: 44px; /* Fix 7: 44px tap target (was min-height: 0 → ~31px) */
 }
 .player-tools select:focus { outline-color: var(--accent-dark); }
 .tool-btn {
   background: #1e293b; border: 1px solid #475569; color: var(--player-ink);
-  font-size: 0.82rem; font-weight: 600; padding: 7px 10px; border-radius: 8px; cursor: pointer; white-space: nowrap;
+  font-size: 0.82rem; font-weight: 600; padding: 8px 12px; border-radius: 8px; cursor: pointer; white-space: nowrap;
+  min-height: 44px; display: inline-flex; align-items: center; justify-content: center; /* Fix 7: 44px tap target (was ~31px) */
 }
 .tool-btn:hover { background: #334155; }
 .tool-btn.active { background: var(--accent); border-color: var(--accent); color: var(--navy); }
@@ -526,6 +541,10 @@ body[data-auth-page] { padding-bottom: 24px; }
 .form-error { color: var(--danger); font-size: 0.92rem; font-weight: 600; margin: 0 0 12px; }
 .form-ok { color: var(--ok); font-size: 0.92rem; font-weight: 600; margin: 0 0 12px; }
 .danger-btn { color: var(--danger); border-color: #fecaca; }
+/* Fix 7: account delete buttons must clear 44px (one measured 43px);
+   .btn already sets min-height: 44px, this ID rule makes it explicit
+   so no cascade quirk can shave a pixel off. */
+#acDelAccountBtn, #acDelDetailsBtn { min-height: 44px; }
 .danger-btn:hover { background: #fef2f2; border-color: var(--danger); }
 
 /* ---------------- Misc ---------------- */
@@ -549,34 +568,58 @@ body[data-auth-page] { padding-bottom: 24px; }
   .price-grid { grid-template-columns: 1fr; }
   .policy-grid { grid-template-columns: repeat(2, 1fr); }
   .footer-grid { grid-template-columns: 1fr 1fr; }
-  /* H1 fix (Nov 6): at ≤900px the single-row player cannot fit cover +
-     info + controls + progress + tools in ~728px — the fixed siblings
-     alone total ~528px, so .player-info (width 150px, shrinkable,
-     min-width 0) was crushed to ~16px and the track to ~32px. A floor
-     alone cannot fit either (150px info still overflows by ~130px),
-     so the player goes two-row here: info gets a hard 180px floor on
-     row 1 (cover 48 + info 180 + controls 134 + tools ~346 + gaps +
-     padding = ~762px at 768px) and the progress track takes a full
-     second row, keeping both time labels and a wide seek target.
-     The ≤640px block below overrides all of this (single row, tools
-     hidden), so phone behavior is unchanged. */
+  /* Fix 6 (Nov 7, rev): THREE-row player. Row 1 is cover + info + controls
+     only, so .player-info flexes wide (min 210px — the longest title
+     needs 208px) and the title fits. Row 2 is the progress track on its
+     OWN row: flex-basis 100% FORCES the wrap — without it the track
+     stayed on row 1 sharing free space 50/50 with .player-info and
+     measured only 127px at 768px / 73px at 1024px. Row 3 is the tools.
+     Player height is ~169px (59 + 10 + 26 + 10 + 44 + 20 padding), so body
+     padding is 181px. The ≤640px block below overrides all of this
+     (single row, tools hidden), so phone behavior is unchanged. */
   .player-inner { flex-wrap: wrap; gap: 10px; padding: 10px 12px; }
-  .player-info { flex: 0 0 180px; min-width: 180px; width: 180px; }
+  .player-info { flex: 1 1 210px; min-width: 210px; width: auto; }
   .player-progress { flex: 1 1 100%; order: 5; min-width: 0; }
-  body { padding-bottom: 116px; } /* room for the two-row sticky player */
-  .chapter-panel { bottom: 112px; } /* clear the taller two-row player */
+  .player-tools { order: 6; }
+  body { padding-bottom: 181px; } /* room for the three-row sticky player */
+  .chapter-panel { bottom: 177px; } /* clear the taller three-row player */
   .player-tools select { max-width: 110px; }
 }
-@media (max-width: 767px) {
-  /* 641–767px: row 1 (cover 48 + info 180 + controls 134) cannot also
-     hold the ~346px tools row, so tools wrap — but with the progress
-     track on its own full row that would make a 3-row player (~140px)
-     taller than the 116px body padding. Let the track share row 1
-     instead (it gets ~225–295px there, still a usable seek target)
-     so the player stays two rows (~109px) and the tools sit on row 2.
-     The ≤640px block below overrides this again (single row). */
-  .player-progress { flex: 1 1 160px; order: 4; min-width: 120px; }
+@media (max-width: 920px) {
+  /* Fix 2 (Nov 7): the header collapses to the hamburger below 920px.
+     The policies header (logo + 5 nav links + "Back to the Site")
+     needs ~872px, so it overflowed at 768–800px while the hamburger
+     stayed hidden (old breakpoint: 640px). 920px — not 900px — because
+     at 901px the ~852px of header content still overflows the ~846px
+     available once the vertical scrollbar is counted. Above 920px the
+     inline nav returns (fits at 1024px+). The toggle already works:
+     policies.js / app.js / auth.js toggle .open on #mainNav, and
+     these rules are the same ones the ≤640px block already used. */
+  .main-nav {
+    display: none; position: absolute; top: 100%; left: 0; right: 0;
+    background: var(--surface); flex-direction: column; padding: 10px 16px 16px;
+    border-bottom: 1px solid var(--line); box-shadow: var(--shadow-lg); margin: 0;
+  }
+  .main-nav.open { display: flex; }
+  .main-nav a { padding: 10px 8px; }
+  .nav-toggle { display: block; }
 }
+@media (max-width: 1100px) {
+  /* Fix 6 (Nov 7, rev): same three-row player for 901–1100px (see the
+     ≤900px block). At 1024px the single-row track was only ~84px; on
+     its own row it is ~910px. Above 1100px the single row returns. */
+  .player-inner { flex-wrap: wrap; gap: 10px; padding: 10px 12px; }
+  .player-info { flex: 1 1 210px; min-width: 210px; width: auto; }
+  .player-progress { flex: 1 1 100%; order: 5; min-width: 0; }
+  .player-tools { order: 6; }
+  body { padding-bottom: 181px; }
+  .chapter-panel { bottom: 177px; }
+  .player-tools select { max-width: 110px; }
+}
+/* Fix 6 (Nov 7, rev): no 641–767px override is needed any more — the
+   player stays three rows at every width in 641–1100px (progress on its
+   own row by flex-basis 100%). (The old @767 block that put the track
+   on row 1 was removed.) */
 @media (max-width: 640px) {
   /* Phone = the same laptop layout, compacted — NOT a stacked,
      dumbed-down layout (TY Nov 6: clean transfer, look the same
@@ -636,9 +679,12 @@ body[data-auth-page] { padding-bottom: 24px; }
   .player-inner { flex-wrap: nowrap; gap: 8px; padding: 8px 12px; }
   .player-cover { width: 36px; height: 36px; font-size: 0.9rem; border-radius: 6px; }
   .player-info { flex: 1 1 auto; min-width: 0; width: auto; }
+  /* Fix 6: keep the subtitle single-line on phones (the base rule
+     wraps it to two lines) so the single-row player stays compact. */
+  .player-sub { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; -webkit-line-clamp: unset; }
   .player-controls { gap: 4px; }
-  .player-btn { width: 32px; height: 32px; }
-  .player-btn.play { width: 40px; height: 40px; }
+  .player-btn { width: 44px; height: 44px; /* Fix 7: 44px tap target (was 32px) */ }
+  .player-btn.play { width: 44px; height: 44px; /* Fix 7: 44px tap target (was 40px) */ }
   .player-progress { flex: 1 1 64px; min-width: 64px; gap: 6px; }
   .player-time { display: none; }
   .player-tools { display: none; }
@@ -706,7 +752,8 @@ body.reading main > :not(#bookView) { display: none !important; }
 .gate-box .btn { margin: 6px 4px 0; }
 .link-btn {
   background: none; border: none; color: var(--accent); font: inherit;
-  font-weight: 700; cursor: pointer; padding: 0;
+  font-weight: 700; cursor: pointer; padding: 6px 4px;
+  display: inline-flex; align-items: center; min-height: 44px; /* Fix 7: 44px tap target (was ~23px) */
 }
 .link-btn:hover { text-decoration: underline; }
 .chapter-list button.locked { color: var(--ink-faint); }

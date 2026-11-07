@@ -1651,12 +1651,14 @@ $("#progressTrack").addEventListener("click", e => {
   if (!player.current) return;
   const rect = e.currentTarget.getBoundingClientRect();
   const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
-  const target = ratio * player.current.secs;
-  if (target > previewLimitSecs()) {
-    // A visitor tried to seek past the preview — open the gate.
-    openSignup("That part of the book is past the preview. Sign up to listen to the full story.");
-    return;
-  }
+  // Visitors seek proportionally inside the 90s preview; signed-in users
+  // seek across the full book (their limit is Infinity). The visitor target
+  // stops 1s shy of the limit: landing exactly on 90s would trip the
+  // end-of-preview gate on the next 250ms tick, so a tap at 100% seeks to
+  // 89s instead of exiting to signup. Natural playback still gates at 90s.
+  const target = isSignedIn()
+    ? ratio * player.current.secs
+    : Math.min(ratio * previewLimitSecs(), previewLimitSecs() - 1);
   player.position = target;
   saveAudioProgress();
   updatePlayerUI();

@@ -19,7 +19,7 @@ Open `index.html` in any browser. No build step, no server required — everythi
 2. **Real audio** — the player is simulated (progress advances on a timer). Replace with real audio files + word-timing maps for seamless voice switching.
 3. **Sign-up / log-in backend** — sign-up and log-in are DEMO sign-ins: they set a simulated signed-in state in `localStorage` (no account or payment is created) so the preview gate can be tested. Needs real accounts + Stripe checkout.
 4. **Payment integration** — no Stripe integration yet. Pricing shown is the locked pricing.
-5. **Upfront fee amount** — shown as `$[amount]` (to be set). The policy explains what it pays for and that it is non-refundable once signup completes.
+5. **Upfront fee** — there is none. You pay only the subscription; no fee is charged at signup.
 6. **Full policy text** — `policies.html` has plain-language summaries only. Full legal text to be finalized and reviewed by a lawyer before launch.
 7. **Reader license purchase price** — not set yet; noted as "price varies by book" on the site.
 8. **Voice rendering** — the 12 descriptive voices (Warm, Deep, Bright, Smooth, Bold, Gentle, Rich, Crisp, Soft, Strong, Calm, Lively) are names in the UI only; real voice rendering (Gemini/ElevenLabs) is a backend concern.

@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Policies — YourDailyBook</title>
 <meta name="description" content="YourDailyBook policies in plain language: Terms of Service, Privacy, Content & AI Disclosure, Licensing, Refunds, How It Works, Community Guidelines, Age & Content Access, and Data Deletion.">
-<link rel="stylesheet" href="style.css?v=17.3">
+<link rel="stylesheet" href="style.css?v=17.4">
+<link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
   .policy-doc { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow); margin-bottom: 20px; }
   .policy-doc h2 { font-size: 1.5rem; }
@@ -115,7 +117,7 @@
     <span class="eyebrow">5 · Summary</span>
     <h2>Refunds &amp; Cancellation</h2>
     <p>Cancel anytime from your account page, in two taps. Your access continues until the end of the paid period, and monthly subscription fees are not refunded for a partial month. If the service was down, or a book was broken and we couldn't fix it, we refund or credit the affected period.</p>
-    <p>The upfront fee pays for pre-render work that happens <strong>at signup</strong> — caching the tone, tempo, and emotion directions and rendering the launch catalog in the narrator voices. That work is performed the moment signup completes, so the upfront fee is <strong>non-refundable once signup is complete</strong>. We explain this plainly before you pay, so you know what the fee pays for.</p>
+    <p>There is no upfront fee — you pay only the subscription.</p>
     <p>For pay-per-book: if your custom book is not delivered (generation failed), you get a full refund. If you simply change your mind after the book is delivered, there's no refund — the work was done. To request a refund, use your account page or email us; we respond within 2 business days.</p>
   </section>
 
@@ -210,21 +212,6 @@
   </div>
 </footer>
 
-<script>
-// Minimal JS for the policies page: mobile nav toggle only.
-(function () {
-  var toggle = document.getElementById("navToggle");
-  var nav = document.getElementById("mainNav");
-  if (toggle && nav) {
-    toggle.addEventListener("click", function () {
-      var open = nav.classList.toggle("open");
-      toggle.setAttribute("aria-expanded", open ? "true" : "false");
-    });
-    nav.querySelectorAll("a").forEach(function (a) {
-      a.addEventListener("click", function () { nav.classList.remove("open"); });
-    });
-  }
-})();
-</script>
+<script src="policies.js?v=1.0"></script>
 </body>
 </html>

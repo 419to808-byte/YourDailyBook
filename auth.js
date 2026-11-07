@@ -769,7 +769,7 @@ function populateSignupForm() {
 // so a no-JS load still shows the honest waitlist form.
 function applyLaunchState() {
   const live = LAUNCH === true;
-  ["fldPass", "fldDob", "weeklySection", "termsField", "feeCallout"].forEach(id => {
+  ["fldPass", "fldDob", "weeklySection", "termsField"].forEach(id => {
     const el = $(id);
     if (el) el.classList.toggle("hidden", !live);
   });
